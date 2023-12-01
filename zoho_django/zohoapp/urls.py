@@ -982,6 +982,9 @@ urlpatterns = [
     path('estimate_details', views.estimate_details, name='estimate_details'),
     path('vendor_credits_details',views.vendor_credits_details,name='vendor_credits_details'), 
 
+
+    path('import_employee_details',views.import_employee_details,name='import_employee_details'), 
+
     
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     

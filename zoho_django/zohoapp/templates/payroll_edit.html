@@ -188,6 +188,13 @@
                     </div>
                     <div class="row pb-3">
                         <div class="col-6">
+                            <label for="">Age</label>
+                        </div>
+                        <div class="col-6"><input type="text" class="form-control text-dark" name="age"
+                                value="{{pay.age}}"></div>
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-6">
                             <label for="">Blood Group</label>
                         </div>
                         <div class="col-6"><input type="text" class="form-control text-dark" name="blood"
@@ -301,7 +308,7 @@
                             </div>
                             <div class="col-6">
                                 <select class="form-control text-dark" name="ttype" id="ttype">
-                                    <option value="{{bank.transaction_type}}">{{bank.transaction_type}}</option>
+                                    <option value="{{bank.transaction_type}}" selected hidden>{{bank.transaction_type}}</option>
                                     <option value="ATM">ATM</option>
                                     <option value="Cash">Cash</option>
                                     <option value="Check">Check</option>
@@ -361,7 +368,7 @@
                             </div>
                             <div class="col-6">
                                 <select class="form-control text-dark" name="ttype" id="ttype">
-                                    <option value=""></option>
+                                    <option value="" selected hidden></option>
                                     <option value="ATM">ATM</option>
                                     <option value="Cash">Cash</option>
                                     <option value="Check">Check</option>
