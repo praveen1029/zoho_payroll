@@ -916,6 +916,8 @@ class Payroll(models.Model):
     TDS = models.IntegerField(null=True,default=0)
     age = models.PositiveIntegerField(default=0)
     salaryrange = models.CharField(max_length=10, choices=[('1-10', '1-10'), ('10-15', '10-15'), ('15-31', '15-31')], default='1-10')
+    amountperhr = models.CharField(max_length=100,null=True)
+    workhr = models.CharField(max_length=100,null=True)
     
     
 class Bankdetails(models.Model):

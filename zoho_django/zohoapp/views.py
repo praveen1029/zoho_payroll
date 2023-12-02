@@ -9447,6 +9447,7 @@ def editpayroll(request,id):
         p.last_name=request.POST['lname']
         p.alias=request.POST['alias']
         p.joindate=request.POST['joindate']
+        p.salaryrange=request.POST['salarydate']   
         p.salary=request.POST['salary']   
         new=request.FILES.get('file')
         old= p.image
@@ -9454,6 +9455,8 @@ def editpayroll(request,id):
             p.image=old
         else:
             p.image=new
+        p.amountperhr=request.POST['amnthr']
+        p.workhr=request.POST['hours']
         p.emp_number = request.POST['empnum']
         p.designation = request.POST['designation']
         p.location=request.POST['location']
@@ -9486,11 +9489,23 @@ def editpayroll(request,id):
         istds=request.POST['istds']
         if istds == '1':
             p.isTDS=request.POST['pora']
-            p.TDS=request.POST['tds']
+            if request.POST['pora'] == 'Percentage':
+                p.TDS=float(request.POST['pcnt'])
+            else:
+                p.TDS=float(request.POST['amnt'])
         else:
             p.isTDS='No'
             p.TDS=0
         p.save()
+
+        if Payrollfiles.objects.filter(payroll=p).exists():
+            if(request.FILES.get('attach')):
+                pf=Payrollfiles.objects.get(payroll=p)
+                pf.attachment=request.request.FILES.get('attach')
+                pf.save()
+        else:
+            if(request.FILES.get('attach')):
+                Payrollfiles.objects.create(attachment=request.FILES.get('attach'),payroll=p)
         
         if Bankdetails.objects.filter(payroll=p).exists():
             b=Bankdetails.objects.get(payroll=p)
@@ -9531,6 +9546,8 @@ def createpayroll(request):
         image=request.FILES.get('file')
         if image == None:
             image="image/img.png"
+        amountperhr=request.POST['amnthr']
+        workhr=request.POST['hours']
         empnum=request.POST['empnum']
         designation = request.POST['designation']
         location=request.POST['location']
@@ -9566,9 +9583,9 @@ def createpayroll(request):
         pran=request.POST['pran']
         age=request.POST['age']
         payroll= Payroll(user=usr, title=title,first_name=fname,last_name=lname,alias=alias,image=image,joindate=joindate,salary_type=saltype,salary=salary,age=age,
-                         emp_number=empnum,designation=designation,location=location, gender=gender,dob=dob,blood=blood,parent=fmname,spouse_name=sname,
-                         address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone, email=email,ITN=itn,Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,
-                         isTDS=istdsval,TDS=tds)
+                         emp_number=empnum,designation=designation,location=location, gender=gender,dob=dob,blood=blood,parent=fmname,spouse_name=sname,workhr=workhr,
+                         amountperhr = amountperhr,ephn=ephn, address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone, email=email,ITN=itn,
+                         Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds)
         payroll.save()
 
         bank=request.POST['bank']
@@ -21158,68 +21175,81 @@ def import_employee_details(request):
 
             for row_number in range(2, eb.max_row + 1):
                 billsheet = [eb.cell(row=row_number, column=col_num).value for col_num in range(1, eb.max_column + 1)]
-                if not billsheet[0] or not billsheet[1] or not billsheet[2] or not billsheet[3] or not billsheet[4] or not billsheet[5] or not billsheet[6]:
+                if not billsheet[0] or not billsheet[1] or not billsheet[2] or not billsheet[4] or not billsheet[5] or not billsheet[6]:
                     return JsonResponse({'message': f'error occured in line {row_number}'})
                 
-                if not billsheet[7] or not billsheet[8] or not billsheet[9] or not billsheet[10] or not billsheet[11] or not billsheet[12] or not billsheet[13]:
+                if billsheet[6] == 'Time Based':
+                    if not billsheet[7] or not billsheet[8]:
+                        return JsonResponse({'message': f'error occured in line {row_number}'})
+                
+                if not billsheet[9] or not billsheet[10] or not billsheet[11] or not billsheet[12] or not billsheet[13] or not billsheet[14] or not billsheet[15]:
                     return JsonResponse({'message': f'error occured in line {row_number}'})
                 
-                if not billsheet[16] or not billsheet[17] or not billsheet[18] or not billsheet[20] or not billsheet[21]:
+                if not billsheet[18] or not billsheet[19] or not billsheet[20] or not billsheet[22] or not billsheet[23]:
                     return JsonResponse({'message': f'error occured in line {row_number}'})
 
-                if billsheet[21] == 'Yes':
-                    if not billsheet[22] or not billsheet[23] or not billsheet[24] or not billsheet[25]:
+                if billsheet[23] == 'Yes':
+                    if not billsheet[24] or not billsheet[25] or not billsheet[26] or not billsheet[27]:
                         return JsonResponse({'message': f'error occured in line {row_number}'})
                         
-                if not billsheet[26] or not billsheet[27]:
+                if not billsheet[28] or not billsheet[29]:
                     return JsonResponse({'message': f'error occured in line {row_number}'})
 
-                if billsheet[27] == 'Yes':
-                    if not billsheet[28] or not billsheet[29]:
+                if billsheet[29] == 'Yes':
+                    if not billsheet[30] or not billsheet[31]:
                         return JsonResponse({'message': f'error occured in line {row_number}'})
                         
-                if not billsheet[30] or not billsheet[31] or not billsheet[32] or not billsheet[33] or not billsheet[34]:
+                if not billsheet[32] or not billsheet[33] or not billsheet[34] or not billsheet[35] or not billsheet[36]:
                     return JsonResponse({'message': f'error occured in line {row_number}'})
             
 
-                payroll= Payroll(user=user, title=billsheet[0], first_name=billsheet[1], last_name=billsheet[2], alias=billsheet[3], joindate=billsheet[4],
-                                    salaryrange=billsheet[5], salary=billsheet[7], emp_number=billsheet[8], designation=billsheet[9], location=billsheet[10], 
-                                    gender=billsheet[11], dob=billsheet[12], blood=billsheet[13], address=billsheet[16], permanent_address=billsheet[17], 
-                                    Phone=billsheet[18], email=billsheet[20], ITN=billsheet[30], Aadhar=billsheet[31], UAN=billsheet[32], PFN=billsheet[33], PRAN=billsheet[34])
+                payroll= Payroll(user=user, title=billsheet[0], first_name=billsheet[1], last_name=billsheet[2], joindate=billsheet[4], salaryrange=billsheet[5], 
+                                    salary=billsheet[9], emp_number=billsheet[10], designation=billsheet[11], location=billsheet[12], gender=billsheet[13], 
+                                    dob=billsheet[14], blood=billsheet[15], address=billsheet[18], permanent_address=billsheet[19], Phone=billsheet[20], 
+                                    email=billsheet[22], ITN=billsheet[32], Aadhar=billsheet[33], UAN=billsheet[34], PFN=billsheet[35], PRAN=billsheet[36])
                 payroll.save()
 
-                birthdate_date = billsheet[12]
+                birthdate_date = billsheet[14]
                 current_date = datetime.now()
                 age = current_date.year - birthdate_date.year - ((current_date.month, current_date.day) < (birthdate_date.month, birthdate_date.day))
                 payroll.age = age
 
+                if not billsheet[3]:
+                    payroll.alias = ''
+                else:
+                    payroll.alias = billsheet[3]
+
                 if billsheet[6] == 'Time Based':
                     payroll.salary_type = 'Variable'
+                    payroll.amountperhr = billsheet[7]
+                    payroll.workhr = billsheet[8]
                 else:
                     payroll.salary_type = billsheet[6]
+                    payroll.amountperhr = ''
+                    payroll.workhr = ''
 
-                if not billsheet[14]:
+                if not billsheet[16]:
                     payroll.parent = ''
                 else:
-                    payroll.parent = billsheet[14]
+                    payroll.parent = billsheet[16]
 
-                if not billsheet[15]:
+                if not billsheet[17]:
                     payroll.spouse_name = ''
                 else:
-                    payroll.spouse_name = billsheet[15]
+                    payroll.spouse_name = billsheet[17]
 
-                if not billsheet[19]:
+                if not billsheet[21]:
                     payroll.emergency_phone = ''
                 else:
-                    payroll.emergency_phone = billsheet[19]
+                    payroll.emergency_phone = billsheet[21]
                 
-                if billsheet[21] == 'Yes':
-                    Bankdetails.objects.create(payroll=payroll,acc_no=billsheet[22], IFSC=billsheet[23], bank_name=billsheet[24], 
-                                                branch=billsheet[25], transaction_type=billsheet[26])
+                if billsheet[23] == 'Yes':
+                    Bankdetails.objects.create(payroll=payroll,acc_no=billsheet[24], IFSC=billsheet[25], bank_name=billsheet[26], 
+                                                branch=billsheet[27], transaction_type=billsheet[28])
 
-                if billsheet[27] == 'Yes':
-                    payroll.isTDS = billsheet[28]
-                    payroll.TDS = billsheet[29]
+                if billsheet[29] == 'Yes':
+                    payroll.isTDS = billsheet[30]
+                    payroll.TDS = billsheet[31]
                 else:
                     payroll.isTDS = 'No'
                     payroll.TDS = 0
