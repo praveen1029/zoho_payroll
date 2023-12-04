@@ -2,6 +2,10 @@
 {% block content %}
 {% load static %}
 
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
 <style>
   #over:hover{
@@ -16,42 +20,39 @@
     cursor: pointer;
   }
 
-    #employeetable tbody tr {
-      counter-increment: rowNumber;
-    }
+  #employeetable tbody tr {
+    counter-increment: rowNumber;
+  }
 
-    #employeetable tbody tr td:first-child::before {
-      content: counter(rowNumber);
-    }
+  #employeetable tbody tr td:first-child::before {
+    content: counter(rowNumber);
+  }
 
   .modal-backdrop {
-  z-index: -1;
-}
+    z-index: -1;
+  }
 </style>
 
 <div class="container-fluid">
   <div class="fixed-top" style="top: 7rem; margin-left: 18rem;">
     <div style="height: 600px;overflow-y: scroll;">
-
       <div class="row container-fluid">
-          <div class="col-md-3"><a class="text-white" style="font-size: 2rem;">All Employees</a></div>
-          <div class="col-md-5"></div>
-          <div class="col-md-3">
-            <div class="d-flex" style="margin-left: 9vh; margin-top: 2vh;" >
-              <a onclick="ExportToExcel()" class="btn text-center pt-2 btn-outline-warning d-flex" style="width: fit-content;">
-                <i class='fas fa-file-export' style='font-size:20px'></i> <span style="margin-top: 3px;">Export</span>
-              </a>
-              <a data-toggle="modal" data-target="#importmodal" class="btn text-center pt-2 btn-outline-warning d-flex" style="width: fit-content; margin-left: 2vh;" onclick="sampleexcel()">
-                <i class="fas fa-file-import" style='font-size:20px'></i> <span style="margin-top: 3px;">Import</span>
-              </a>
-            </div>
+        <div class="col-md-3"><a class="text-white" style="font-size: 2rem;">All Employees</a></div>
+        <div class="col-md-5"></div>
+        <div class="col-md-3">
+          <div class="d-flex" style="margin-left: 9vh; margin-top: 2vh;" >
+            <a onclick="ExportToExcel()" class="btn text-center pt-2 btn-outline-warning d-flex" style="width: fit-content;">
+              <i class='fas fa-file-export' style='font-size:20px'></i> <span style="margin-top: 3px;">Export</span>
+            </a>
+            <a data-toggle="modal" data-target="#importmodal" class="btn text-center pt-2 btn-outline-warning d-flex" style="width: fit-content; margin-left: 2vh;" onclick="sampleexcel()">
+              <i class="fas fa-file-import" style='font-size:20px'></i> <span style="margin-top: 3px;">Import</span>
+            </a>
           </div>
+        </div>
       </div>    
       <br>
       <div class="row container-fluid mb-3">
-        <div class="col-md-3">
-          <input type="text" id="search" class="form-control bg-light text-dark" placeholder="Search.." autocomplete="off">
-        </div>
+        <div class="col-md-3"><input type="text" id="search" class="form-control bg-light text-dark" placeholder="Search.." autocomplete="off"></div>
         <div class="col-md-2">
           <div class="dropdown">
             <a class="btn text-center px-4 pt-2 btn-outline-warning" id="sortbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button" >
@@ -114,7 +115,6 @@
           </table>
         </div>
       </div>
-
       <div class="row" hidden>
         <table id="employeemodeltable">
           <thead>
@@ -198,42 +198,37 @@
         </table>
       </div>
     </div>
-    
-
-
   </div>
-    <div class="modal fade" id="importmodal" style="margin-top: 7vh;">
-      <div class="modal-dialog ">
-        <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
-          <div class="modal-header">
-            <h5 class="modal-title" id="excelModalLabel">Upload File
-            <label for="" style="color: red; font-size: x-small;" >* Refer Downloaded Sheet For Format </label><br></h5>
-            <button type="button" class="btn close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true" style="font-size: x-large;">&times;</span>
-            </button>
+
+  <div class="modal fade" id="importmodal" style="margin-top: 7vh;">
+    <div class="modal-dialog ">
+      <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="excelModalLabel">Upload File
+          <label for="" style="color: red; font-size: x-small;" >* Refer Downloaded Sheet For Format </label><br></h5>
+          <button type="button" class="btn close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" style="font-size: x-large;">&times;</span>
+          </button>
         </div>
-          <div class="modal-body" style="background: rgb(32, 35, 37);">
-            <div class="card">
-              <form action="" method="post" class="needs-validation" novalidate autocomplete="off" id="excelForm">
-                {% csrf_token %}
-                <div class="form-group mt-3" style="margin-left: 2vh;">
+        <div class="modal-body" style="background: rgb(32, 35, 37);">
+          <div class="card">
+            <form action="" method="post" class="needs-validation" novalidate autocomplete="off" id="excelForm">
+              {% csrf_token %}
+              <div class="form-group mt-3" style="margin-left: 2vh;">
                 <label for="file" style="font-size: medium;">Choose Excel File for Employees - </label> <br><br>
                 <input type="file" class="form-control-file" id="empfile" name="empfile" accept=".xls, .xlsx"><br>
-
               </div>
-            <div class="modal-footer">
-              <button type="button" class="btn text-center pt-2 btn-outline-warning" data-dismiss="modal">Close</button>
-              <button type="button" class="btn text-center pt-2 btn-outline-warning" onclick="uploadFile()" data-dismiss="modal">Upload</button>
+              <div class="modal-footer">
+                <button type="button" class="btn text-center pt-2 btn-outline-warning" data-dismiss="modal">Close</button>
+                <button type="button" class="btn text-center pt-2 btn-outline-warning" onclick="uploadFile()" data-dismiss="modal">Upload</button>
+              </div>
+            </form>
           </div>
-              </form>
-              </div>
-              </div>
-          </div>
-      </div>  
+        </div>
+      </div>
     </div>  
+  </div>  
 </div>
-
-
 
 <script>
   function sortTableName() {
@@ -291,7 +286,6 @@
   });
 </script>
 
-
 <script>
   var $rows = $('table tbody tr');
   $('#search').keyup(function() {
@@ -301,102 +295,86 @@
       return ~text.indexOf(val);
     }).show();
   });
-
 </script>
 
 <script>
-
-    function applyFilter(currentFilter) {
-      // Get all rows in the tbody
-      var rows = $("#employeetable tbody tr");
-
-      // Show all rows initially
-      rows.show();
-
-      // If the filter is set to "Active" or "Inactive," hide rows that don't match the filter
-      if (currentFilter === "Active" || currentFilter === "Inactive") {
-        rows.filter(":not(:contains('" + currentFilter + "'))").hide();
-      }
+  function applyFilter(currentFilter) {
+    var rows = $("#employeetable tbody tr");
+    rows.show();
+    if (currentFilter === "Active" || currentFilter === "Inactive") {
+      rows.filter(":not(:contains('" + currentFilter + "'))").hide();
     }
+  }
 </script>
 
 <script>
   function ExportToExcel(){
     var tableData = $("#employeetable tbody tr:visible").map(function(index) {
-          return {
-            "#": index + 1, 
-            "DATE": $(this).find("td:eq(1)").text(),
-            "EMPLOYEE NAME": $(this).find("td:eq(2)").text(),
-            "EMPLOYEE MAIL": $(this).find("td:eq(3)").text(),
-            "DESIGNATION": $(this).find("td:eq(4)").text(),
-            "SALARY TYPE": $(this).find("td:eq(5)").text(),
-            "ACTIVE": $(this).find("td:eq(6)").text(),
-            "SALARY": $(this).find("td:eq(7)").text()
-          };
-        }).get();
-
-        // Create a worksheet
-        var ws = XLSX.utils.json_to_sheet(tableData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-        XLSX.writeFile(wb, 'Employees.xlsx');
-      }
+      return {
+        "#": index + 1, 
+        "DATE": $(this).find("td:eq(1)").text(),
+        "EMPLOYEE NAME": $(this).find("td:eq(2)").text(),
+        "EMPLOYEE MAIL": $(this).find("td:eq(3)").text(),
+        "DESIGNATION": $(this).find("td:eq(4)").text(),
+        "SALARY TYPE": $(this).find("td:eq(5)").text(),
+        "ACTIVE": $(this).find("td:eq(6)").text(),
+        "SALARY": $(this).find("td:eq(7)").text()
+      };
+    }).get();
+    var ws = XLSX.utils.json_to_sheet(tableData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, 'Employees.xlsx');
+  }
 </script>
 
 <script>
-      function sampleexcel(){
-        const table1 = document.querySelector('#employeemodeltable');
-        const ws1 = XLSX.utils.table_to_sheet(table1);
-        const wb1 = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb1, ws1, 'Sheet1');
-        XLSX.writeFile(wb1, 'EmployeeModel.xlsx');
-    }
+  function sampleexcel(){
+    const table1 = document.querySelector('#employeemodeltable');
+    const ws1 = XLSX.utils.table_to_sheet(table1);
+    const wb1 = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb1, ws1, 'Sheet1');
+    XLSX.writeFile(wb1, 'EmployeeModel.xlsx');
+  }
 </script>
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-<script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
 <script>
   function uploadFile() {
-      const form = document.getElementById('excelForm');
-      const formData = new FormData(form);
+    const form = document.getElementById('excelForm');
+    const formData = new FormData(form);
       
-      fetch('import_employee_details', {
-          method: 'POST',
-          body: formData
-      })
-      .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(jsonResponse => {
-                    if (jsonResponse.message) {
-                        // Display SweetAlert for errors
-                        swal({
-                            title: 'Error',
-                            text: jsonResponse.message,
-                            icon: 'error',
-                            buttons: false,
-                        });
-                    } else {
-                        // Format the JSON for better readability
-
-                        // Show the JSON response in SweetAlert
-                        swal({
-                            title: 'Imported!',
-                            text: jsonResponse.success,
-                            icon: 'success',
-                            buttons: false,
-                        });
-                    }
-                })
-                .then(response => {
-            setTimeout(function () {
-                location.reload();
-            }, 1400);
-        })
+    fetch('import_employee_details', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+         throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(jsonResponse => {
+      if (jsonResponse.message) {
+        swal({
+            title: 'Error',
+            text: jsonResponse.message,
+            icon: 'error',
+            buttons: false,
+        });
+      } else {
+        swal({
+            title: 'Imported!',
+            text: jsonResponse.success,
+            icon: 'success',
+            buttons: false,
+        });
+      }
+    })
+    .then(response => {
+      setTimeout(function () {
+        location.reload();
+      }, 1400);
+    })
   }
 </script>
 

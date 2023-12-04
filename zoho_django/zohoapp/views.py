@@ -9538,6 +9538,7 @@ def createpayroll(request):
         lname=request.POST['lname']
         alias=request.POST['alias']
         joindate=request.POST['joindate']
+        salarydate=request.POST['salary']
         saltype=request.POST['saltype']
         if (saltype == 'Fixed'):
             salary=request.POST['fsalary']
@@ -9563,7 +9564,6 @@ def createpayroll(request):
         padd2=request.POST['paddress2'] 
         paddress= padd1+padd2
         phone=request.POST['phone']
-        ephn=request.POST['ephone']
         ephone=request.POST['ephone']
         email=request.POST['email']
         isdts=request.POST['tds']
@@ -9584,8 +9584,8 @@ def createpayroll(request):
         age=request.POST['age']
         payroll= Payroll(user=usr, title=title,first_name=fname,last_name=lname,alias=alias,image=image,joindate=joindate,salary_type=saltype,salary=salary,age=age,
                          emp_number=empnum,designation=designation,location=location, gender=gender,dob=dob,blood=blood,parent=fmname,spouse_name=sname,workhr=workhr,
-                         amountperhr = amountperhr,ephn=ephn, address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone, email=email,ITN=itn,
-                         Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds)
+                         amountperhr = amountperhr, address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone, email=email,ITN=itn,Aadhar=an,
+                         UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds,salaryrange = salarydate)
         payroll.save()
 
         bank=request.POST['bank']
@@ -14651,10 +14651,7 @@ def challan_customize(request):
 
 def create_loan(request):
     error_message = None
-
     if request.method == 'POST':
-        print("Received a POST request")
-        # Process form submission
         employee_id = request.POST.get('employee')
         issue_date = request.POST.get('loan_issue_date')
         expiry_date = request.POST.get('loan_expiry_date')
@@ -14664,18 +14661,13 @@ def create_loan(request):
         try:
             if cutting_type == 'percentage_wise':
                 cutting_percentage = request.POST.get('percentage')
-                # Fetch the payroll object based on the selected employee
                 payroll = Payroll.objects.get(id=employee_id)
-                # Calculate monthly cutting amount as a percentage of salary
                 cutting_amount = (float(cutting_percentage) / 100) * float(payroll.salary)
             else:
                 cutting_amount = request.POST.get('monthly_cutting_amount')
-                cutting_percentage = 0  # Initialize as None
+                cutting_percentage = 0
 
-            # Fetch the payroll object based on the selected employee
             payroll = Payroll.objects.get(id=employee_id)
-            
-            # Check if monthly cutting amount is greater than salary
             if float(cutting_amount) > float(payroll.salary):
                 raise ValueError("Monthly cutting amount cannot exceed employee's salary")
 
@@ -14691,24 +14683,11 @@ def create_loan(request):
             
             loan.save()
 
-            # Debugging: Print information to the console
-            print(f"Employee ID: {employee_id}")
-            print(f"Issue Date: {issue_date}")
-            print(f"Expiry Date: {expiry_date}")
-            print(f"Loan Amount: {loan_amount}")
-            print(f"Cutting Type: {cutting_type}")
-            print(f"Cutting Percentage: {cutting_percentage}")
-            print(f"Cutting Amount: {cutting_amount}")
-            print(f"Payroll: {payroll}")
-            print(f"Loan: {loan}")
-
-            return redirect('employee_list')  # Redirect to the employee list page
+            return redirect('employee_list') 
         except (ValueError, Payroll.DoesNotExist, ValidationError) as e:
-            # Handle validation errors (e.g., percentage > 100%, amount >= salary, employee not found)
             error_message = str(e)
 
-    # For GET requests or when the form is not submitted, retrieve a list of all payrolls
-    payrolls = Payroll.objects.all()
+    payrolls = Payroll.objects.filter(loan__isnull=True)
     company = company_details.objects.get(user=request.user)
     context = {
         'payrolls': payrolls,
@@ -14723,7 +14702,7 @@ def employee_list(request):
     company=company_details.objects.get(user=request.user)
     for employee in employees_with_loans:
         employee.loan_info = Loan.objects.get(payroll=employee)
-    
+
     context = {
         'employees': employees_with_loans,
         'company': company,
@@ -15069,11 +15048,13 @@ def loan_deactive(request, loan_id):
     
 def createpayroll2(request):
     if request.method=='POST':
+        usr=request.user
         title=request.POST['title']
         fname=request.POST['fname']
         lname=request.POST['lname']
         alias=request.POST['alias']
         joindate=request.POST['joindate2']
+        salarydate=request.POST['salarydate']
         saltype=request.POST['saltype']
         if (saltype == 'Fixed'):
             salary=request.POST['fsalary']
@@ -15082,6 +15063,8 @@ def createpayroll2(request):
         image=request.FILES.get('file')
         if image == None:
             image="image/img.png"
+        amountperhr=request.POST['amnt']
+        workhr=request.POST['hours']
         empnum=request.POST['empnum']
         designation = request.POST['designation']
         location=request.POST['location']
@@ -15103,7 +15086,6 @@ def createpayroll2(request):
             ephone=None
         else:
             ephone=request.POST['ephone']
-        
         isdts=request.POST['tds']
         if isdts == '1':
             istdsval=request.POST['pora']
@@ -15119,9 +15101,11 @@ def createpayroll2(request):
         uan=request.POST['uan'] 
         pfn=request.POST['pfn']
         pran=request.POST['pran']
-        payroll= Payroll(title=title,first_name=fname,last_name=lname,alias=alias,image=image,joindate=joindate,salary_type=saltype,salary=salary,emp_number=empnum,designation=designation,location=location,
-                         gender=gender,dob=dob,blood=blood,parent=fmname,spouse_name=sname,address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone,
-                         email=email,ITN=itn,Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds)
+        age=request.POST['age']
+        payroll= Payroll(user=usr,title=title,first_name=fname,last_name=lname,alias=alias,image=image,joindate=joindate,salary_type=saltype,salary=salary,
+                            salaryrange = salarydate, emp_number=empnum,designation=designation,location=location, gender=gender,dob=dob,blood=blood,parent=fmname,
+                            spouse_name=sname, address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone,workhr=workhr,amountperhr = amountperhr,
+                            age=age, email=email,ITN=itn,Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds)
         payroll.save()
 
         bank=request.POST['bank']
