@@ -1386,6 +1386,7 @@ class Creditnote_doc_upload(models.Model):
     
     
 class Loan(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,default='')
     payroll = models.ForeignKey(Payroll, on_delete=models.CASCADE)
     date_issue = models.DateField()
     date_expiry = models.DateField()
@@ -1409,11 +1410,14 @@ class Loan(models.Model):
         null=True,
         blank=True,
         validators=[MinValueValidator(0.0)]
-    )
-
-    
-    
+    )    
     active = models.BooleanField(default=True)
+    duration = models.CharField(max_length=255, blank=True)
+    pay_method=models.CharField(null=True,blank=True,max_length=255)
+    cheque_id=models.CharField(null=True,blank=True,max_length=255)
+    upi_id=models.CharField(null=True,blank=True,max_length=255)
+    bank_id=models.CharField(null=True,blank=True,max_length=255)
+    note=models.CharField(null=True,blank=True,max_length=255)
 
     def __str__(self):
         return f"Loan for {self.payroll}"
@@ -1438,7 +1442,7 @@ class Loan(models.Model):
         
 class LoanComment(models.Model):
     
-    payroll = models.ForeignKey('Payroll', on_delete=models.CASCADE)  
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, null=True)  
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -1448,7 +1452,7 @@ class LoanComment(models.Model):
         
 class LoanAttach(models.Model):
     
-    payroll = models.ForeignKey('Payroll', on_delete=models.CASCADE)  
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, null=True)   
     attach = models.FileField(upload_to='loan_attachments/', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -1670,3 +1674,14 @@ class cust_comment(models.Model):
     custcom = models.ForeignKey(customer,on_delete=models.CASCADE,null=True,blank=True)
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,default='') 
     comment = models.CharField(max_length=250,null=True)
+
+
+class LoanDuration(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True)
+    day = models.IntegerField(null=True, blank=True)
+    duration = models.CharField(max_length=50, choices=(
+        ('Months', 'Months'),
+        ('Month', 'Month'),
+        ('Years', 'Years'),
+        ('Year', 'Year'),
+    ))

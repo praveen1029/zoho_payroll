@@ -87,14 +87,10 @@ def register(request):
     return render(request,'register.html',{'msg' : messages})
 
 def login(request):
-        
     if request.method == 'POST':
-        
         email_or_username = request.POST['emailorusername']
         password = request.POST['password']
-        print(password)
         user = authenticate(request, username=email_or_username, password=password)
-        print(user)
         if user is not None:
             auth.login(request,user)
             # .........................................................
@@ -193,16 +189,8 @@ def login(request):
             {"user": user, "account_type": "Other Current Liability","account_name":"TDS Payable","credit_no":"","sub_account":"","parent_account":"","bank_account_no":"","currency":"","account_code":"","description":"","watchlist":"","create_status":"default","status":"active"},
             {"user": user, "account_type": "Other Current Assets","account_name":"TDS Receivable","credit_no":"","sub_account":"","parent_account":"","bank_account_no":"","currency":"","account_code":"","description":"","watchlist":"","create_status":"default","status":"active"},
             {"user": user, "account_type": "Expense","account_name":"Transportation Expense","credit_no":"","sub_account":"","parent_account":"","bank_account_no":"","currency":"","account_code":"","description":"An expense account to track the amount spent on transporting goods or providing services.","watchlist":"","create_status":"default","status":"active"},
-
-
-
-
             ]
-            print(account_info[0])
-            print(account_info[1])
-
             for account in account_info:
-                print(account)
                 if not Chart_of_Account.objects.filter(account_name=account['account_name']).exists():
                     new_account = Chart_of_Account(user=account['user'],account_name=account['account_name'],account_type=account['account_type'],credit_no=account['credit_no'],sub_account=account['sub_account'],parent_account=account['parent_account'],bank_account_no=account['bank_account_no'],currency=account['currency'],account_code=account['account_code'],description=account['description'],watchlist=account['watchlist'],create_status=account['create_status'],status=account['status'])
                     new_account.save()
@@ -215,6 +203,7 @@ def login(request):
                 purchase_orders='yes',payment_made='yes',bills='yes',recurring_bills='yes',projects='yes',chart_of_accounts='yes',
                 employees='yes',employees_loan='yes',pdf='yes',slip='yes',print_opt='yes')
                 settings_row.save()
+
             return redirect('dashboard')
         else:
             return redirect('/')
@@ -14657,6 +14646,12 @@ def create_loan(request):
         expiry_date = request.POST.get('loan_expiry_date')
         loan_amount = request.POST.get('loan_amount')
         cutting_type = request.POST.get('payment_method')
+        duration = request.POST.get('duration')
+        paymethod = request.POST.get('payment_type')
+        upi = request.POST.get('upi_id')
+        cheque = request.POST.get('cheque_id')
+        bnk = request.POST.get('bnk_id')
+        note = request.POST.get('note')
 
         try:
             if cutting_type == 'percentage_wise':
@@ -14678,7 +14673,14 @@ def create_loan(request):
                 loan_amount=loan_amount,
                 monthly_cutting_type=cutting_type,
                 monthly_cutting_percentage=cutting_percentage,
-                monthly_cutting_amount=cutting_amount
+                monthly_cutting_amount=cutting_amount,
+                duration = duration,
+                pay_method = paymethod,
+                upi_id = upi,
+                cheque_id = cheque,
+                bank_id = bnk,
+                note = note,
+                user=request.user
             )
             
             loan.save()
@@ -14687,12 +14689,21 @@ def create_loan(request):
         except (ValueError, Payroll.DoesNotExist, ValidationError) as e:
             error_message = str(e)
 
-    payrolls = Payroll.objects.filter(loan__isnull=True)
+    payrolls = Payroll.objects.filter(user=request.user, status='Active')
+    lemp = []
+    employees_with_loans = Payroll.objects.filter(loan__isnull=False)
+    for e in employees_with_loans:
+        lemp.append(e.id)
     company = company_details.objects.get(user=request.user)
+    dur = LoanDuration.objects.filter(user=request.user)
+    bank = Bankcreation.objects.filter(user=request.user)
     context = {
         'payrolls': payrolls,
         'error_message': error_message,
         'company': company,
+        'dur':dur,
+        'lemp':lemp,
+        'bank':bank
     }
     return render(request, 'create_loan.html', context)
     
@@ -14784,42 +14795,18 @@ def edit_loan(request, loan_id):
     
     
 def employee_loan_details(request, payroll_id):
-    status = request.GET.get('status', 'all')
-
-    if status == 'active':
-        loans = Loan.objects.filter(payroll_id=payroll_id, active=True)
-    elif status == 'inactive':
-        loans = Loan.objects.filter(payroll_id=payroll_id, active=False)
-    else:
-        loans = Loan.objects.filter(payroll_id=payroll_id)
-
-    payroll = get_object_or_404(Payroll, id=payroll_id)
-    loans = Loan.objects.filter(payroll=payroll)
-    l=Loan.objects.all()
-    comments = LoanComment.objects.filter(payroll=payroll)
-    attach = LoanAttach.objects.filter(payroll=payroll)
-    ''' if request.method == 'POST':
-        comment_text = request.POST.get('comment', '')  # Get the comment from the form
-        loan_id = request.POST.get('loan_id', '')  # Get the associated loan ID from the form
-        
-        if comment_text and loan_id:
-            loan = get_object_or_404(Loan, id=loan_id)
-            comment = LoanComment(comment=comment_text, loan=loan)
-            comment.save()
-            # Redirect to the same page after saving the comment
-            return redirect('employee_loan_details', payroll_id=payroll_id)'''
+    loan = Loan.objects.get(id=payroll_id)
+    all_loan = Loan.objects.filter(user=request.user)
     company=company_details.objects.get(user=request.user)
+    comments = LoanComment.objects.filter(loan=loan)
+    attach = LoanAttach.objects.filter(loan=loan)
     context = {
-        'p': payroll,
-        'loans': loans,
-        'l' : l,
-        'comments': comments,
-        'attach' : attach,
+        'loan': loan,
+        'all_loan': all_loan,
         'company': company,
+        'comments':comments,
+        'attach':attach
     }
-    for loan in loans:
-        print(f"Loan ID: {loan.id}")
-
     return render(request, 'employee_loan_details.html', context)
     
     
@@ -14883,11 +14870,11 @@ def employee_loan_template(request, payroll_id):
     
 def add_loan_comment(request,payroll_id):
     
-    payroll = get_object_or_404(Payroll, id=payroll_id)
+    loan = get_object_or_404(Loan, id=payroll_id)
     
     if request.method== 'POST':
-        comments=request.POST['comment']
-        c= LoanComment(comment=comments,payroll=payroll)
+        comments=request.POST['comments']
+        c= LoanComment(comment=comments,loan=loan)
         c.save()
     return redirect('employee_loan_details',payroll_id=payroll_id)
     
@@ -15129,15 +15116,29 @@ def createpayroll2(request):
         
 def loan_dropdown(request):
     options = {}
-    option_objects = Payroll.objects.all()  
+    option_objects = Payroll.objects.filter(status='Active',user=request.user)  
+    loan_objects = list(Loan.objects.values_list('payroll'))
+    loan_list = [item[0] for item in loan_objects]
+    
     for option in option_objects:
-        options[option.id] = {
-            'employee_name': option.first_name + ' ' + option.last_name,
-            'email': option.email,
-            'salary': option.salary,
-            'employee': option.emp_number,
-            'join_date': option.joindate.strftime('%Y-%m-%d'),  
-        }
+        if option.id in loan_list:
+            options[option.id] = {
+                'employee_name': option.first_name + ' ' + option.last_name,
+                'email': option.email,
+                'salary': option.salary,
+                'employee': option.emp_number,
+                'have-loan': '1',
+                'join_date': option.joindate.strftime('%Y-%m-%d'),  
+            }
+        else:
+            options[option.id] = {
+                'employee_name': option.first_name + ' ' + option.last_name,
+                'email': option.email,
+                'salary': option.salary,
+                'employee': option.emp_number,
+                'have-loan': '0',
+                'join_date': option.joindate.strftime('%Y-%m-%d'),  
+            }
     return JsonResponse(options)
     
     
@@ -21246,4 +21247,17 @@ def import_employee_details(request):
             return JsonResponse({'message': 'File upload Failed!'})
     else:
         return JsonResponse({'message': 'File upload Failed!'})
-        
+
+def create_loan_duration(request):
+    days=request.POST['days']
+    durs=request.POST['durs']
+    LoanDuration.objects.create(day=days,duration=durs,user=request.user)
+    return JsonResponse({'success': 'LoanDuration Saved'})
+
+def loan_duration(request):
+    dur = LoanDuration.objects.filter(user=request.user)
+    data = {}
+    for d in dur:
+        duration = str(d.day) + ' ' + d.duration
+        data[duration] = [duration]
+    return JsonResponse(data)

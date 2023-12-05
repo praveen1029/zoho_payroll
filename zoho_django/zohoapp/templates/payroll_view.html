@@ -603,8 +603,8 @@
       rows = table.rows;
       for (i = 0; i < rows.length - 1; i++) {
         shouldSwitch = false;
-        x = rows[i].getElementsByTagName("label")[0];
-        y = rows[i + 1].getElementsByTagName("label")[0];
+        x = rows[i].getElementsByTagName("b")[0];
+        y = rows[i + 1].getElementsByTagName("b")[0];
         if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
           shouldSwitch = true;
           break;

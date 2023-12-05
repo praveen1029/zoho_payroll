@@ -100,7 +100,7 @@
             </thead>
             <tbody>
               {% for employee in employees %}
-                <tr id="over" class='clickable-row' data-href="{% url 'employee_loan_details' employee.id %}" data-status="{{employee.loan_info.active }}">
+                <tr id="over" class='clickable-row' data-href="{% url 'employee_loan_details' employee.loan_info.id %}">
                   <td style="text-align: center;"></td>
                   <td style="text-align: center;">{{employee.joindate | date:'d-m-Y'}}</td>
                   <td style="text-align: center;">{{employee.first_name}} {{i.last_name}}</td>
@@ -223,8 +223,8 @@
                 <input type="file" class="form-control-file" id="empfile" name="empfile" accept=".xls, .xlsx"><br>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn text-center pt-2 btn-outline-warning" data-dismiss="modal">Close</button>
                 <button type="button" class="btn text-center pt-2 btn-outline-warning" onclick="uploadFile()" data-dismiss="modal">Upload</button>
+                <button type="button" class="btn text-center pt-2 btn-outline-warning" data-dismiss="modal">Close</button>
               </div>
             </form>
           </div>

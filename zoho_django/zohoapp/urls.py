@@ -981,6 +981,8 @@ urlpatterns = [
     path('retainer_invoice_details', views.retainer_invoice_details, name='retainer_invoice_details'),
     path('estimate_details', views.estimate_details, name='estimate_details'),
     path('vendor_credits_details',views.vendor_credits_details,name='vendor_credits_details'), 
+    path('create_loan_duration',views.create_loan_duration,name='create_loan_duration'), 
+    path('loan_duration',views.loan_duration,name='loan_duration'), 
 
 
     path('import_employee_details',views.import_employee_details,name='import_employee_details'), 
