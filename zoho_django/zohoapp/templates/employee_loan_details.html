@@ -85,7 +85,7 @@
     z-index: -1;
   }
 
-#over:hover{
+.over:hover{
     background-color: rgba(110, 110, 110, 0.616);
   }
 
@@ -98,6 +98,14 @@
   }
 
   #transactiontable tbody tr td:first-child::before {
+    content: counter(rowNumber);
+  }
+
+  #statementtable tbody tr {
+    counter-increment: rowNumber;
+  }
+
+  #statementtable tbody tr td:first-child::before {
     content: counter(rowNumber);
   }
 
@@ -175,7 +183,7 @@
           </div>
         </div> 
 
-        <div class="col-md-9 ml-1  mb-5 " id="overviewdiv">
+        <div class="col-md-9 ml-1  mb-5 " id="overviewdiv" >
           <div class="row">
             <div class="col-md-7" >
               <a class="text-white" style="font-size: 1.5rem;"><h2>{{loan.payroll.first_name}} {{loan.payroll.last_name}}</h2></a>
@@ -191,12 +199,6 @@
             <div class="col-md-6" style="text-align: right; margin-left: -2vh;">
               <a href="{% url 'edit_loan' loan_id=loan.id %}"  class=" text-dark" >
                 <button class="btn btn-outline-warning"  title="Edit"><i class="fas fa-edit"></i></button>
-              </a>
-              <a  class="text-dark"  onclick="exportToPDF()" id="pdflink">
-                <button class="btn btn-outline-warning"  title="Pdf"><i class="fas fa-file-pdf-o"></i></button>
-              </a>
-              <a class=" text-dark"  onclick="printSelectedArea()"  >
-                <button class="btn btn-outline-warning"  title="Print"> <i class="fas fa-print"></i> </button> 
               </a>
               <a class="btn btn-outline-warning" href="" data-toggle="modal" data-target="#commentModal" data-toggle="tooltip" title="comment">
                 <i class="far fa-comment"></i>
@@ -235,8 +237,8 @@
             </div>
           </div><br>
 
-          <div id="printdiv" style="overflow-y: scroll; height: 71vh;">
-            <div class="row" id="div-to-pdf" style="background-color: #ffddb0; margin-left:1px; margin-right: 1rem; ">
+          <div style="overflow-y: scroll; height: 71vh;">
+            <div class="row" style="background-color: #ffddb0; margin-left:1px; margin-right: 1rem; ">
               <br>
               <div class="row">
                 <div class="col-md-3 mt-3" >
@@ -418,11 +420,10 @@
           </div>
         </div>
 
-        <div class="col-md-9" id="transactiondiv">
+        <div class="col-md-9" id="transactiondiv" style="display: none;">
             <div class="row">
                 <div class="col-md-7" >
                   <a class="text-white" style="font-size: 1.5rem;"><h2>{{loan.payroll.first_name}} {{loan.payroll.last_name}}</h2></a>
-    
                 </div>
             </div>
             <div class="row">
@@ -431,50 +432,91 @@
                     <a class="btn" style="background-color: chocolate; margin-right: 2vh;"><i class="fa fa-list"></i>Transactions</a>
                     <a class="btn" onclick="tostatement()" style="background-color: white; color: black; margin-right: 2vh;"><i class="fas fa-file-alt"></i>Statement</a>
                 </div>
-                <div class="col-md-6" style="text-align: right; margin-left: -2vh;">
+                <div class="col-md-3"></div>
+                <div class="col-md-3" style="text-align: right;">
+                  <div class="d-flex">
                     <div class="dropdown">
-                        <a class="btn text-center px-4 p-2 mt-1 btn-outline-warning" id="sortbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
-                          Make Payment
-                        </a>
-                        <div class="dropdown-menu m-1">
-                          <a class="dropdown-item" >Repayment Due</a>
-                          <a class="dropdown-item">Issue New Loan</a>
-                        </div>
+                      <a class="btn text-center px-4 p-2 btn-outline-warning" id="sortbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                        Make Payment
+                      </a>
+                      <div class="dropdown-menu m-1">
+                        <a class="dropdown-item" href="{% url 'repayment_view' loan.id %}" >Repayment Due</a>
+                        <a class="dropdown-item" href="{% url 'additional_loan_view' loan.id %}">Issue New Loan</a>
                       </div>
+                  </div>
+                  &nbsp;
+                  <a  class="text-dark px-2"  onclick="exporttoexcel()" id="pdflink" >
+                    <button class="btn btn-outline-warning"  title="Excel" style="height: 33px;"><i class="fas fa-file-excel-o"></i></button>
+                  </a>
+                  </div>
+
+
                 </div>
             </div>
+            
+            <div class="row mt-3 mb-1">
+              <div class="col-md-5"><input type="text" id="searchtransaction" class="form-control bg-light text-dark" placeholder="Search.." autocomplete="off" style="height: 85%;width: 102%;"></div>
+              <div class="col-md-2"></div>
+              <div class="col-md-5">                  <a class="text-white" style="font-size: small; text-align: right;"><h2>Loan Amount : {{last_loan}} &nbsp;</h2></a></div>
+            </div>
 
-            <div class="mt-3">
-                <table class="table  text-white" id="transactiontable">
+            <div style="background-color: #ffddb0; border-radius: 5px;">
+              <div class="mt-3 p-1" >
+                <table class="table  text-white" id="transactiontable" >
                     <thead>
                       <tr>
-                        <th style="text-align: center; color: white;">#</th>
-                        <th style="text-align: center; color: white;">LOAN DATE</th>
-                        <th style="text-align: center; color: white;">PARTICULAR</th>
-                        <th style="text-align: center; color: white;">AMOUNT</th>
-                        <th style="text-align: center; color: white;">INTEREST</th>
-                        <th style="text-align: center; color: white;">TOTAL AMOUNT</th>
-                        <th style="text-align: center; color: white;">BALANCE</th>
+                        <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">#</th>
+                        <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">LOAN DATE</th>
+                        <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">PARTICULAR</th>
+                        <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">AMOUNT</th>
+                        <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">INTEREST</th>
+                        <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">TOTAL AMOUNT</th>
+                        <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">BALANCE</th>
+                        <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">ACTION</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {% for employee in employees %}
-                        <tr id="over">
-                          <td style="text-align: center;"></td>
-                          <td style="text-align: center;">{{employee.joindate | date:'d-m-Y'}}</td>
-                          <td style="text-align: center;">{{employee.first_name}} {{i.last_name}}</td>
-                          <td style="text-align: center;">{{employee.email}}</td>
-                          <td style="text-align: center;">{{employee.emp_number}}</td>
-                          <td style="text-align: center;">{{employee.loan_info.loan_amount }}</td>
-                          <td style="text-align: center;">{{employee.loan_info.date_expiry | date:'d-m-Y'}}</td>
+                      {% for r in repay %}
+                        <tr class="over">
+                          <td style="text-align: center; color: black;"></td>
+                          <td style="text-align: center; color: black;">{{r.payment_date | date:'d-m-Y'}}</td>
+                          <td style="text-align: center; color: black;">{{r.particular}}</td>
+                          <td style="text-align: center; color: black;">{{r.payment_made}}</td>
+                          <td style="text-align: center; color: black;">{{r.interest}}</td>
+                          <td style="text-align: center; color: black;">{{r.total_payment}}</td>
+                          <td style="text-align: center; color: black;">{{r.balance}}</td>
+                          {% if r.particular == 'LOAN ISSUED' %}
+                          <td></td>
+                          {% else %}
+                          <td style="text-align: center; color: black;">
+                            <button style="border: none;background: none;" type="button" class="ropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                              <span class="fa fa-ellipsis-v" style="color: #8b3131;"></span>
+                          </button>
+                            <ul class="dropdown-menu">
+                              <li>
+                                <a class="dropdown-item"  >
+                                  <span class="fa fa-edit pe-2"></span> Edit
+                                </a>
+                              </li>
+                              <li>
+                                <a class="dropdown-item" href="{% url 'delete_repayment' r.id %}" >
+                                  <span class="fa fa-trash" style="padding-inline-start: 0.1rem;padding-inline-end:0.7rem ;"></span> Delete
+                                </a>
+                              </li>
+                            </ul>
+                          </td>
+                          {% endif %}
                         </tr>
                       {% endfor %}
                     </tbody>
                   </table>
             </div>
+            </div>
+
         </div>
 
-        <div class="col-md-9" id="statementdiv">
+
+        <div class="col-md-9" id="statementdiv" style="display: none;">
             <div class="row">
                 <div class="col-md-7" >
                   <a class="text-white" style="font-size: 1.5rem;"><h2>{{loan.payroll.first_name}} {{loan.payroll.last_name}}</h2></a>
@@ -488,9 +530,6 @@
                     <a class="btn" style="background-color: chocolate; margin-right: 2vh;"><i class="fas fa-file-alt"></i>Statement</a>
                 </div>
                 <div class="col-md-6" style="text-align: right; margin-left: -2vh;">
-                    <a href="{% url 'edit_loan' loan_id=loan.id %}"  class=" text-dark" >
-                    <button class="btn btn-outline-warning"  title="Edit"><i class="fas fa-edit"></i></button>
-                    </a>
                     <a  class="text-dark"  onclick="exportToPDF()" id="pdflink">
                     <button class="btn btn-outline-warning"  title="Pdf"><i class="fas fa-file-pdf-o"></i></button>
                     </a>
@@ -522,16 +561,117 @@
                     <label for="file-input" class="btn btn-outline-warning" data-toggle="tooltip" title="Upload Attachments">
                         <i class="fas fa-paperclip"></i>
                     </label>
-                    <a href="{% url 'delete_loan' loan.id %}" class="  text-dark" >
-                    <button class="btn btn-outline-warning"  title="Delete"><i class="fas fa-trash-alt"></i></button>
-                    </a>
-                    <input id="file-input" type="file" name="file" style="display:none;" onchange="uploadFile()">
-                    {% if loan.active == 1 %}
-                    <a class="btn btn-outline-warning" href="{% url 'loan_deactive' loan.id %}" id="sts">Active</a>
-                    {% else %}
-                    <a class="btn btn-outline-warning" href="{% url 'loan_active' loan.id %}" id="sts">Inactive</a>
-                    {% endif %}
                 </div>
+
+                <div id="printdiv" class="mt-3" style="overflow-y: scroll;height: 600px;width: 100%; margin-left: -1vh">
+         
+                  <section  id="div-to-pdf" style="background-color: rgb(255, 221, 176);"class=" p-2 m-2">
+                      <header style="	background-color: #8b3131;border-radius: 1rem;">
+                          <div class="logo ">
+                            <h2 class="text-white">{{company.company_name}}</h2>
+                          </div>
+                          <div style="background: #8b3131;color: white;" class="company-info">
+                              
+                              <p class="text-white"> {{company.address}}<br>{{company.contact_number}} <br> {{company.company_email}}</p>
+                          </div>
+                      </header>
+                      <div class="invoice-box">
+                          <h1 class="text-dark">Employee Details</h1>
+                          <div class="invoice-header">
+                              <div class="invoice-details text-dark">
+                                <div class="row">
+                                  <div class="col-md-6">
+                                    <table>
+                                      <tr>
+                                          <td class="table-cell text-black" style="border: none;">Employee Name</td>
+                                          <td class="table-cell text-black" style="border: none;">:</td>
+                                          <td class="table-cell text-black" style="border: none;">{{loan.payroll.first_name}} {{loan.payroll.last_name}}</td>
+                                      </tr>
+                                      <tr>
+                                          <td class="table-cell text-black" style="border: none;">Loan Amount</td>
+                                          <td class="table-cell text-black" style="border: none;">:</td>
+                                          <td class="table-cell text-black" style="border: none;">{{last_loan}}</td>
+                                      </tr>
+                                      <tr>
+                                          <td class="table-cell text-black" style="border: none;">Loan Issue Date</td>
+                                          <td class="table-cell text-black" style="border: none;">:</td>
+                                          <td class="table-cell text-black" style="border: none;">{{loan.date_issue}}</td>
+                                      </tr>
+                                      <tr>
+                                          <td class="table-cell text-black" style="border: none;">Loan Expiry Date</td>
+                                          <td class="table-cell text-black" style="border: none;">:</td>
+                                          <td class="table-cell text-black" style="border: none;">{{loan.date_expiry}}</td>
+                                      </tr>
+                                    </table>
+                                  </div>
+                                  <div class="col-md-6">
+                                    <table>
+                                      <tr>
+                                          <td class="table-cell text-black" style="border: none;">Employee No</td>
+                                          <td class="table-cell text-black" style="border: none;">:</td>
+                                          <td class="table-cell text-black" style="border: none;">{{loan.payroll.emp_number}}</td>
+                                      </tr>
+                                      <tr>
+                                          <td class="table-cell text-black" style="border: none;">Employee Phno</td>
+                                          <td class="table-cell text-black" style="border: none;">:</td>
+                                          <td class="table-cell text-black" style="border: none;">{{loan.payroll.Phone}}</td>
+                                      </tr>
+                                      <tr>
+                                          <td class="table-cell text-black" style="border: none;">Loan Email</td>
+                                          <td class="table-cell text-black" style="border: none;">:</td>
+                                          <td class="table-cell text-black" style="border: none;">{{loan.payroll.email}}</td>
+                                      </tr>
+                                      <tr>
+                                          <td class="table-cell text-black" style="border: none;">Loan Address</td>
+                                          <td class="table-cell text-black" style="border: none;">:</td>
+                                          <td class="table-cell text-black" style="border: none;">{{loan.payroll.permanent_address}}</td>
+                                      </tr>
+                                    </table>
+                                  </div>
+                                </div>
+
+                              </div>
+                          </div>
+                            <br>
+                          <table id="statementtable">
+                              <thead >
+                                  <tr>
+                                    <th id="th" style="text-align: center;">#</th>
+                                    <th id="th" style="text-align: center;">Loan Date</th>
+                                      <th id="th" style="text-align: center;">Particular</th>
+                                      <th id="th" style="text-align: center;">Amount</th>
+                                      <th id="th" style="text-align: center;">Interest</th>
+                                      <th id="th" style="text-align: center;">Total Amount</th>
+                                      <th id="th" style="text-align: center;">Balance</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                {% for r in repay %}
+                                <tr style="color: black;">
+                                  <td style="text-align: center;"></td>
+                                  <td style="text-align: center;">{{r.payment_date | date:'d-m-Y'}}</td>
+                                  <td style="text-align: center;">{{r.particular}}</td>
+                                  <td style="text-align: center;">{{r.payment_made}}</td>
+                                  <td style="text-align: center;">{{r.interest}}</td>
+                                  <td style="text-align: center;">{{r.total_payment}}</td>
+                                  <td style="text-align: center;">{{r.balance}}</td>
+                                </tr>
+                                {% endfor %}
+    
+                            </tbody>
+                          </table><br>
+                          
+                         
+                      </div>
+    
+                      <footer class="mb-5">
+                          <p class="text-dark">&copy; Zho Books 2023 | Info park kakkanad kochi, Ernamkulam, kerala India 12345 | Phone: (123) 456-7890 | Email: info@zohodjango.com</p>
+                      </footer>
+                      <div class="mt-5 mb-5">
+          
+                      </div>
+                     </section>
+               </div>
             </div>
         </div>
         
@@ -586,6 +726,26 @@
 </section>
 
 <script>
+  function exporttoexcel(){
+    var tableData = $("#transactiontable tbody tr:visible").map(function(index) {
+      return {
+        "#": index + 1, 
+        "LOAN DATE": $(this).find("td:eq(1)").text(),
+        "PARTICULAR": $(this).find("td:eq(2)").text(),
+        "AMOUNT": $(this).find("td:eq(3)").text(),
+        "INTEREST": $(this).find("td:eq(4)").text(),
+        "TOTAL AMOUNT": $(this).find("td:eq(5)").text(),
+        "BALANCE": $(this).find("td:eq(6)").text(),
+      };
+    }).get();
+    var ws = XLSX.utils.json_to_sheet(tableData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, 'EmployeeLoanPayment.xlsx');
+  }
+</script>
+
+<script>
     function tooverview(){
         document.getElementById('overviewdiv').style.display = 'block'
         document.getElementById('transactiondiv').style.display = 'none'
@@ -618,7 +778,7 @@
 </script>
 
 <script>
-  function printSelectedArea(area){
+  function printSelectedArea(){
     var printContents = document.getElementById("printdiv").innerHTML;
     var $printerDiv = $('<div class="printContainer bg-white"></div>');
     $printerDiv.html(printContents);
@@ -645,6 +805,15 @@
 <script>
   var $rows = $('#myTable tbody tr');
   $('#search').keyup(function() {
+    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+    $rows.hide().filter(function() {
+      var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+      return ~text.indexOf(val);
+    }).show();
+  });
+
+  var $rows = $('#transactiontable tbody tr');
+  $('#searchtransaction').keyup(function() {
     var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
     $rows.hide().filter(function() {
       var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();

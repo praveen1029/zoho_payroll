@@ -113,51 +113,21 @@
 <section>
     <div class="containerprof p-5">
         <div class="header pb-5">
-            <h2 class="mb-0 text-uppercase text-right">CREATE EMPLOYEE LOAN</h2>
+            <h2 class="mb-0 text-uppercase text-right">Additional Loan</h2>
             <hr>
+            {% for message in messages %}
+            <h5>
+                <div class="alert alert-danger message">
+                    {{ message }}
+                </div>
+            </h5>
+        {% endfor %}
         </div>
-        <form method="POST" action="{% url 'create_loan' %}" id="myForm" onsubmit="return validateform()">
+
+        <form method="POST" action="{% url 'add_additional_loan' repay.loan.id %}" id="myForm" onsubmit="return validateform()">
             {% csrf_token %}
             <div class="row">
                 <div class="data">
-                    <!-- Employee selection -->
-                    <div class="row pb-3">
-                        <div class="col-3">
-                            <label for="">Select Employee</label>
-                            
-                        </div>
-                        <div class="col-5">
-                            <div class=" d-flex">
-
-                                <select class="form-control text-dark bg-light" name="employee" id="employee" onchange="fillEmployeeDetails(); clearErrorMessage();" style="width: 500px;">
-                                    <option value="" selected hidden>Select an Employee</option>
-                                    {% for payroll in payrolls %}
-                                    {% if payroll.id in lemp %}
-                                        <option value="{{ payroll.id }}"
-                                            data-email="{{ payroll.email }}"
-                                            data-emp-number="{{ payroll.emp_number }}"
-                                            data-salary="{{ payroll.salary }}"
-                                            data-joindate="{{ payroll.joindate | date:'Y-m-d' }}" data-have-loan="1">
-                                            {{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}
-                                        </option>
-                                    {% else %}
-                                    <option value="{{ payroll.id }}"
-                                    data-email="{{ payroll.email }}"
-                                    data-emp-number="{{ payroll.emp_number }}"
-                                    data-salary="{{ payroll.salary }}"
-                                    data-joindate="{{ payroll.joindate | date:'Y-m-d' }}" data-have-loan="0">
-                                    {{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}
-                                </option>
-                                    {% endif %}
-                                    {% endfor %}
-                                </select>
-                                <a data-toggle="modal" data-target="#newvendor" class="btn" style="background-color: chocolate; color: black; height: 100%; margin-left: 2vh; font-size: large; padding-top: 10px; ">+</a>
-                            </div>
-                                
-                                <div id="error-employee" style="color: red;"></div>
-                                
-                            </div>
-                    </div>
 
                     
             
@@ -175,90 +145,43 @@
                 
                     <div class="row pb-3">
                         <div class="col-md-3">
-                            <label for="">Email</label>
+                            <label for="">Balance Loan Amount</label>
                         </div>
                         <div class=" col-5">
-                            <input type="email" class="form-control text-dark bg-light" name="email" id="email" readonly >
+                            <input type="number" class="form-control text-dark bg-light" name="bamnt" id="bamnt" value="{{repay.balance}}" readonly >
                         </div>
                     </div>
                     <div class="row pb-3">
                         <div class="col-3">
-                            <label for="">Employee Number</label>
+                            <label for="">New Loan Amount</label>
                         </div>
                         <div class="col-5">
-                            <input type="text" class="form-control text-dark bg-light" name="emp_id" id="emp_id" readonly>
+                            <input type="number" class="form-control text-dark bg-light" name="namnt" id="namnt" value="0" onchange="gettotal()" required>
                         </div>
                     </div>
                     <div class="row pb-3">
                         <div class="col-3">
-                            <label for="">Salary</label>
+                            <label for="">Total Loan Amount</label>
                         </div>
                         <div class="col-5">
-                            <input type="number" class="form-control text-dark bg-light" name="salary" id="salary" readonly>
+                            <input type="number" class="form-control text-dark bg-light" name="total" id="total" value="{{repay.balance}}" readonly>
                         </div>
                     </div>
                     <div class="row pb-3">
                         <div class="col-3">
-                            <label for="">Joining Date</label>
+                            <label for="">Adjustment Date</label>
                         </div>
                         <div class="col-5">
-                            <input type="date" class="form-control text-dark bg-light" name="joindate" id="joindate" readonly>
-                        </div>
-                    </div>
-
-                    <div class="row pb-3">
-                        <div class="col-3">
-                            <label for="">Date of Loan Issue</label>
-                        </div>
-                        <div class="col-5">
-                            <input type="date" class="form-control text-dark bg-light" name="loan_issue_date" id="loan_issue_date" required>
-                        </div>
-                    </div>
-
-                    <div class="row pb-3" >
-                        
-                        
-                        <div class="col-3">
-                            <label for="duration" class="mr-2 mb-0" style="width: 150px;">Loan Duration</label>
-                        </div>
-                        <div class="col-5 d-flex">
-                            <select class="form-control text-dark bg-light" name="duration" id="duration" onchange="updateExpDate()" required>
-                                <option value="" selected hidden>Select</option>
-                                <option value="6 Months">6 Months</option>
-                                <option value="1 Year">1 Year</option>
-                                {% for d in dur %}
-                                <option value="{{d.day}} {{d.duration}}">{{d.day}} {{d.duration}}</option>
-                                {% endfor %}
-                            </select>
-                            <a data-toggle="modal" data-target="#newduration" class="btn" style="background-color: chocolate; color: black; height: 100%; margin-left: 2vh; font-size: large; padding-top: 10px; ">+</a>
-
-                        </div>
-                    </div>
-
-                    <div class="row pb-3">
-                        <div class="col-3">
-                            <label for="">Expiry Date</label>
-                        </div>
-                        <div class="col-5">
-                            <input type="date" class="form-control text-dark bg-light" name="loan_expiry_date" id="loan_expiry_date" readonly>
+                            <input type="date" class="form-control text-dark bg-light" name="adjdate" id="adjdate" value="{{today}}">
                         </div>
                     </div>
                     
                     <div class="row pb-3">
                         <div class="col-3">
-                            <label for="">Loan Amount</label>
+                            <label for="">Payment Method</label>
                         </div>
                         <div class="col-5">
-                            <input type="number" class="form-control text-dark bg-light" name="loan_amount" id="loan_amount" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row pb-3">
-                        <div class="col-3">
-                            <label for="">Payment Type</label>
-                        </div>
-                        <div class="col-5">
-                            <select class="form-control text-dark bg-light" name="payment_type" id="payment_type" required>
+                            <select class="form-control text-dark bg-light" name="payment_method" id="payment_method" required>
                                 <option value="" selected hidden>Select</option>
                                 <option value="Cash">Cash</option>
                                 <option value="UPI">UPI</option>
@@ -277,7 +200,7 @@
                         </div>
                 
                         <div class="col-5">
-                            <input type="text" class="form-control text-black bg-white" name="cheque_id" id="cheque_id" required>
+                            <input type="text" class="form-control text-black bg-white" name="cheque_id" id="cheque_id">
                         </div>
                     </div>  
                 
@@ -287,7 +210,7 @@
                         </div>
                 
                         <div class="col-5">
-                            <input type="text" class="form-control text-black bg-white" name="upi_id" id="upi_id"required >
+                            <input type="text" class="form-control text-black bg-white" name="upi_id" id="upi_id" >
                         </div>
                     </div>  
                 
@@ -301,45 +224,9 @@
                         </div>
                     </div>  
 
-                    <div class="row pb-3">
-                        <div class="col-3">
-                            <label for="payment_method" class="mr-2 mb-0" style="width: 150px;">Payment Method</label>
-                        </div>
-                        <div class="col-5">
-                            <select class="form-control text-dark bg-light" name="payment_method" id="payment_method"  onchange="showAdditionalFields()" required>
-                                <option value="" selected hidden>Select</option>
-                                <option value="percentage_wise">Percentage Wise</option>
-                                <option value="amount_wise">Amount Wise</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div id="percentageWiseFields" style="display: none;">
-                        
-                    <div class="row pb-3">
-                        
-                        <div class="col-3" >
-                            <label for="percentage" class="mr-2 mb-0" style="width: 150px;">Percentage</label>
-                        </div>
-                        <div class="col-5" >
-                            <input type="number" class="form-control text-dark bg-light" name="percentage" id="percentage" step="0.01" min="0" max="100" onchange="updateMonthlyCuttingAmount()">
-                            <div id="error-percentage" style="color: red;"></div>
-                        </div>
-                    </div>
                 </div>
 
-                    <div id="percentageWiseMonthlyFields" style="display: none;">
-                    <div class="row pb-3" >
-                        
-                        
-                        <div class="col-3">
-                            <label for="monthly_cutting_amount" class="mr-2 mb-0" style="width: 150px;">Monthly Cutting Amount</label>
-                        </div>
-                        <div class="col-5">
-                            <input type="number" class="form-control text-dark bg-light" name="monthly_cutting_amount" id="monthly_cutting_amount" step="0.01" min="0" onchange="handleFormSubmission()">
-                            <div id="error-amount" style="color: red;"></div>
-                        </div>
-                    </div>
+
                     
                     <script>
                         function showAdditionalFields() {
@@ -373,17 +260,7 @@
                     
                     
                                  <!-- Error message for cutting amount validation -->
-                    </div>
 
-                    
-                    <div class="row pb-3">
-                        <div class="col-3">
-                            <label for="payment_method" class="mr-2 mb-0" style="width: 150px;">Note</label>
-                        </div>
-                        <div class="col-5">
-                            <textarea class="text-dark bg-white"  name="note" id="note" cols="50" rows="4" style="border-radius: 5px;"></textarea>
-                        </div>
-                    </div>
 
                         </div>
 
@@ -951,9 +828,10 @@
         </section>
 
 
+
         <script>
             function validateform() {
-                var pay_method = document.getElementById('payment_type').value;
+                var pay_method = document.getElementById('payment_method').value;
                 var cheque_id = document.getElementById('cheque_id').value;
                 var upi_id = document.getElementById('upi_id').value;
         
@@ -976,11 +854,24 @@
             }
         </script>
 
+<script>
+    function gettotal(){
+        bamnt = parseFloat($('#bamnt').val())
+        namnt = parseFloat($('#namnt').val())
+        if(namnt < 0 ){
+            $('#namnt').val(0)
+            $('#total').val('{{repay.balance}}')
+            alert('Amount cannot be Negative')
+        }else{
+            $('#total').val(bamnt+namnt)
+        }
+    }
+</script>
         
 <script>
     $(document).ready(function() {
-      $("#payment_type").change(function() {
-        var x=$('#payment_type').val();
+      $("#payment_method").change(function() {
+        var x=$('#payment_method').val();
         if(x==='Cash'){
           $('#chequediv').hide()
           $('#bnkdiv').hide()

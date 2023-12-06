@@ -609,6 +609,12 @@ urlpatterns = [
     
     #Athul
     
+    path('repayment_view/<int:id>', views.repayment_view, name='repayment_view'),
+    path('add_repayment/<int:id>', views.add_repayment, name='add_repayment'),
+    path('additional_loan_view/<int:id>', views.additional_loan_view, name='additional_loan_view'), 
+    path('add_additional_loan/<int:id>', views.add_additional_loan, name='add_additional_loan'), 
+    path('delete_repayment/<int:id>', views.delete_repayment, name='delete_repayment'), 
+
     path('sort_product_name/<int:id>', views.sort_product_name, name='sort_product_name'),
     path('sort_product_hsn/<int:id>', views.sort_product_hsn, name='sort_product_hsn'),
     path('commentproduct/<int:product_id>', views.commentproduct, name='commentproduct'),

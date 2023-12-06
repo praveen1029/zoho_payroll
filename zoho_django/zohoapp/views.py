@@ -14685,6 +14685,20 @@ def create_loan(request):
             
             loan.save()
 
+            LoanRepayment.objects.create(
+                loan=loan,
+                payment_made = loan_amount,
+                interest = 0,
+                total_payment = 0,
+                payment_date = issue_date,
+                balance = loan_amount,
+                payment_method = paymethod,
+                upi_id = upi,
+                cheque_id = cheque,
+                bank_id = bnk,
+                particular = 'LOAN ISSUED'
+            )
+
             return redirect('employee_list') 
         except (ValueError, Payroll.DoesNotExist, ValidationError) as e:
             error_message = str(e)
@@ -14800,12 +14814,16 @@ def employee_loan_details(request, payroll_id):
     company=company_details.objects.get(user=request.user)
     comments = LoanComment.objects.filter(loan=loan)
     attach = LoanAttach.objects.filter(loan=loan)
+    repay = LoanRepayment.objects.filter(loan=payroll_id)
+    last_loan = LoanRepayment.objects.filter(loan=payroll_id).last().balance
     context = {
         'loan': loan,
         'all_loan': all_loan,
         'company': company,
         'comments':comments,
-        'attach':attach
+        'attach':attach,
+        'repay':repay,
+        'last_loan':last_loan
     }
     return render(request, 'employee_loan_details.html', context)
     
@@ -21261,3 +21279,90 @@ def loan_duration(request):
         duration = str(d.day) + ' ' + d.duration
         data[duration] = [duration]
     return JsonResponse(data)
+
+
+def repayment_view(request,id):
+    today = datetime.now().strftime('%Y-%m-%d')
+    loan = Loan.objects.get(id=id)
+    bank = Bankcreation.objects.filter(user=request.user)
+    context = {
+        'loan':loan,
+        'today':today,
+        'bank':bank
+        }
+    return render(request,'repayment_due.html',context)
+
+def add_repayment(request,id):
+    if request.method == 'POST':
+        pamnt=request.POST.get('pamnt')
+        interest=request.POST.get('interest')
+        pdate=request.POST.get('paydate')
+        pmethod=request.POST.get('payment_method')
+        upi_id=request.POST.get('upi_id')
+        cheque_id=request.POST.get('cheque_id')
+        bank_id=request.POST.get('bnk_id')
+        total=request.POST.get('total')
+
+        repay = LoanRepayment.objects.filter(loan=id).last()
+        balance = repay.balance
+        
+        if float(pamnt) > float(balance):
+            messages.info(request, 'Paid Amount is Greater Than Balance!!!')
+            return redirect('repayment_view',id)
+        else:
+            bal = float(balance) - float(pamnt)
+
+        rep = LoanRepayment(payment_made=pamnt,interest=interest,payment_date=pdate,payment_method=pmethod,total_payment = total,
+                            cheque_id=cheque_id,upi_id=upi_id,bank_id=bank_id,balance=bal,particular='EMI PAID',loan=repay.loan)
+        rep.save()
+        return redirect('employee_loan_details',id)
+
+def additional_loan_view(request,id):
+    today = datetime.now().strftime('%Y-%m-%d')
+    bank = Bankcreation.objects.filter(user=request.user)
+    repay = LoanRepayment.objects.filter(loan=id).last()
+    context = {
+        'repay':repay,
+        'today':today,
+        'bank':bank
+        }
+    return render(request,'additional_loan.html',context)
+
+def add_additional_loan(request,id):
+    if request.method == 'POST':
+        namnt=request.POST.get('namnt')
+        adjdate=request.POST.get('adjdate')
+        pmethod=request.POST.get('payment_method')
+        upi_id=request.POST.get('upi_id')
+        cheque_id=request.POST.get('cheque_id')
+        bank_id=request.POST.get('bnk_id')
+        total=request.POST.get('total')
+
+        loan = Loan.objects.get(id=id)
+
+        rep = LoanRepayment(payment_made=namnt,interest=0,total_payment = 0,payment_date=adjdate,payment_method=pmethod, cheque_id=cheque_id,upi_id=upi_id,
+                            bank_id=bank_id,balance=total,particular='ADDITIONAL LOAN ISSUED',loan=loan)
+        rep.save()
+        return redirect('employee_loan_details',id)
+
+
+def delete_repayment(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    loan_id = repay.loan.id
+    id_to_delete = repay.id
+    repay.delete()
+
+    entry_list = []
+    gt_entries = LoanRepayment.objects.filter(id__gt=id_to_delete, loan=loan_id)
+    lt_entrie = LoanRepayment.objects.filter(id__lt=id_to_delete, loan=loan_id).last()
+
+    if gt_entries:
+        entry_list.append(lt_entrie)
+        for g in gt_entries:
+            entry_list.append(g)
+
+        for i in range(1,len(entry_list)):
+            entry_list[i].balance = float(entry_list[i-1].balance) - float(entry_list[i].payment_made)
+            entry_list[i].save()
+
+    return redirect('employee_loan_details',loan_id)

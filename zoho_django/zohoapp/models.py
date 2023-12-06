@@ -1441,7 +1441,6 @@ class Loan(models.Model):
         
         
 class LoanComment(models.Model):
-    
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE, null=True)  
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1451,12 +1450,23 @@ class LoanComment(models.Model):
         
         
 class LoanAttach(models.Model):
-    
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE, null=True)   
     attach = models.FileField(upload_to='loan_attachments/', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    
+
+
+class LoanRepayment(models.Model):
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, null=True)
+    payment_made = models.IntegerField(null=True)
+    interest = models.IntegerField(null=True)
+    total_payment = models.IntegerField(null=True)
+    payment_date = models.DateField(null=True)
+    balance = models.IntegerField(null=True)
+    payment_method = models.CharField(max_length=255,null=True)
+    cheque_id=models.CharField(null=True,blank=True,max_length=255)
+    upi_id=models.CharField(null=True,blank=True,max_length=255)
+    bank_id=models.CharField(null=True,blank=True,max_length=255)
+    particular = models.CharField(max_length=255,null=True)
 #-------------------------------------------------Mirna--------Manual journal------------------------------------------
 
 class Journal(models.Model):
