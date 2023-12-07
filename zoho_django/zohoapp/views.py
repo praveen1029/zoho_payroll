@@ -14741,70 +14741,69 @@ def delete_loan(request, loan_id):
     return redirect('employee_list') 
     
 def edit_loan(request, loan_id): 
-    print("Entering edit_loan view")
-    
     loan = get_object_or_404(Loan, id=loan_id)
     payrolls = Payroll.objects.all()
 
     if request.method == 'POST':
-        print("Processing form submission")
-        
-        employee_id = request.POST.get('employee')
-        issue_date = request.POST.get('date_issue')
-        expiry_date = request.POST.get('date_expiry')
+        issue_date = request.POST.get('loan_issue_date')
+        expiry_date = request.POST.get('loan_expiry_date')
         loan_amount = request.POST.get('loan_amount')
-        
         cutting_type = request.POST.get('payment_method')
-
-        # Check if 'cutting_type' is "percentage_wise" and calculate cutting_amount
+        paymethod = request.POST.get('payment_type')
+        upi = request.POST.get('upi_id')
+        cheque = request.POST.get('cheque_id')
+        bnk = request.POST.get('bnk_id')
+        note = request.POST.get('note')
         if cutting_type == 'amount_wise':
             cutting_percentage = 0
             cutting_amount = request.POST.get('monthly_cutting_amount')
         else:
-            # 'cutting_type' is "amount_wise" or not provided, set cutting_percentage and cutting_amount to existing values
             cutting_percentage = request.POST.get('percentage')
             cutting_amount = (float(cutting_percentage) / 100) * float(loan.payroll.salary)
+            
+        loan.date_issue = issue_date
+        loan.date_expiry = expiry_date
+        loan.loan_amount = loan_amount
+        loan.monthly_cutting_type = cutting_type
+        loan.monthly_cutting_percentage = cutting_percentage
+        loan.monthly_cutting_amount = cutting_amount
+        loan.pay_method = paymethod
+        loan.cheque_id = cheque
+        loan.upi_id = upi
+        loan.bank_id = bnk
+        loan.note = note
+        loan.save()
 
-        # Check if any values have changed before updating
-        if (issue_date != loan.date_issue or
-            expiry_date != loan.date_expiry or
-            loan_amount != loan.loan_amount or
-            cutting_percentage != loan.monthly_cutting_percentage or
-            cutting_amount != loan.monthly_cutting_amount):
-            
-            # Fetch the payroll object based on the selected employee
-            payroll = Payroll.objects.get(id=employee_id)
-            
-            # Check if monthly cutting amount is greater than salary
-            if float(cutting_amount) > float(payroll.salary):
-                error_message = "Monthly cutting amount cannot exceed salary"
-                context = {
-                    'loan': loan, 
-                    'payrolls': payrolls,
-                    'error_message': error_message,
-                }
-                return render(request, 'edit_loan.html', context)
-            
-            # Update loan details
-            loan.payroll = payroll
-            loan.date_issue = issue_date
-            loan.date_expiry = expiry_date
-            loan.loan_amount = loan_amount
-            loan.monthly_cutting_type = cutting_type
-            loan.monthly_cutting_percentage = cutting_percentage
-            loan.monthly_cutting_amount = cutting_amount
-            loan.save()
+        repay = LoanRepayment.objects.filter(loan=loan.id)
 
-            return redirect(reverse('employee_loan_details', args=[loan.payroll.id]))
+        bal = float(loan.loan_amount)
+        for r in repay:
+            if r.particular == 'LOAN ISSUED':
+                r.payment_made = bal
+                r.total_payment = bal
+                r.payment_date = issue_date
+                r.payment_method = paymethod
+                r.cheque_id = cheque
+                r.upi_id = upi
+                r.bank_id = bnk
+                r.balance = bal
+                r.save()
+            elif r.particular == 'ADDITIONAL LOAN ISSUED':
+                r.balance = bal + float(r.payment_made)
+                bal = float(r.balance)
+                r.save()
+            else :
+                r.balance = bal - float(r.payment_made)
+                bal = float(r.balance)
+                r.save()
+        return redirect('employee_loan_details',loan_id)
     
     company = company_details.objects.get(user=request.user)
-    
     context = {
         'loan': loan, 
         'company': company, 
         'payrolls': payrolls,
     }
-    print("Returning from edit_loan view")
     return render(request, 'edit_loan.html', context)
     
     
@@ -21362,7 +21361,179 @@ def delete_repayment(request,id):
             entry_list.append(g)
 
         for i in range(1,len(entry_list)):
-            entry_list[i].balance = float(entry_list[i-1].balance) - float(entry_list[i].payment_made)
+            if entry_list[i].particular == 'ADDITIONAL LOAN ISSUED':
+                entry_list[i].balance = float(entry_list[i-1].balance) + float(entry_list[i].payment_made)
+            else:
+                entry_list[i].balance = float(entry_list[i-1].balance) - float(entry_list[i].payment_made)
             entry_list[i].save()
 
     return redirect('employee_loan_details',loan_id)
+
+
+def edit_repayment_view(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    return render(request,'repayment_edit.html',{'repay':repay})
+
+def edit_repayment(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    repay.payment_made = request.POST.get('pamnt')
+    repay.interest=request.POST.get('interest')
+    repay.payment_date=request.POST.get('paydate')
+    repay.total_payment=request.POST.get('total')
+    repay.payment_method=request.POST.get('payment_method')
+    repay.upi_id=request.POST.get('upi_id')
+    repay.cheque_id=request.POST.get('cheque_id')
+    repay.bank_id=request.POST.get('bnk_id')
+
+    gt_entries = LoanRepayment.objects.filter(id__gt=repay.id, loan=repay.loan.id)
+    lt_entrie = LoanRepayment.objects.filter(id__lt=repay.id, loan=repay.loan.id).last()
+
+    bal = float(lt_entrie.balance)- float(request.POST.get('pamnt'))
+    repay.balance = bal
+    repay.save()
+
+    for entry in gt_entries:
+        if entry.particular == 'ADDITIONAL LOAN ISSUED':
+            entry.balance = bal + float(entry.payment_made)
+        else:
+            entry.balance = bal - float(entry.payment_made)
+        entry.save()
+        bal = entry.balance
+    return redirect('employee_loan_details',repay.loan.id)
+
+
+def edit_additional_loan_view(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    current_bal = float(repay.balance) - float(repay.payment_made)
+    return render(request,'additional_loan_edit.html',{'repay':repay,'current_bal':current_bal})
+
+
+def edit_additional_loan(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    repay.payment_made = request.POST.get('namnt')
+    repay.payment_date=request.POST.get('adjdate')
+    repay.balance=request.POST.get('total')
+    repay.payment_method=request.POST.get('payment_method')
+    repay.upi_id=request.POST.get('upi_id')
+    repay.cheque_id=request.POST.get('cheque_id')
+    repay.bank_id=request.POST.get('bnk_id')
+    repay.save()
+
+    gt_entries = LoanRepayment.objects.filter(id__gt=repay.id, loan=repay.loan.id)
+    bal = float(repay.balance)
+    for entry in gt_entries:
+        if entry.particular == 'ADDITIONAL LOAN ISSUED':
+            entry.balance = bal + float(entry.payment_made)
+        else:
+            entry.balance = bal - float(entry.payment_made)
+        entry.save()
+        bal = entry.balance
+    return redirect('employee_loan_details',repay.loan.id)
+
+
+def import_loan_details(request):
+    print(1)
+    user = request.user
+    if request.method == 'POST':
+        try:
+            excel_bill = request.FILES['loanfile']
+            excel_b = load_workbook(excel_bill)
+            eb = excel_b['Sheet1']
+
+            for row_number in range(2, eb.max_row + 1):
+                billsheet = [eb.cell(row=row_number, column=col_num).value for col_num in range(1, eb.max_column + 1)]
+
+                payroll = Payroll.objects.get(emp_number=billsheet[0])
+
+                loan_list = Loan.objects.values_list(payroll)
+
+                if payroll in loan_list:
+                    return JsonResponse({'message': f'error occured in line {row_number}'})
+
+                # if not billsheet[0] or not billsheet[1] or not billsheet[2] or not billsheet[4] or not billsheet[5] or not billsheet[6]:
+                #     return JsonResponse({'message': f'error occured in line {row_number}'})
+                
+                # if billsheet[6] == 'Time Based':
+                #     if not billsheet[7] or not billsheet[8]:
+                #         return JsonResponse({'message': f'error occured in line {row_number}'})
+                
+                # if not billsheet[9] or not billsheet[10] or not billsheet[11] or not billsheet[12] or not billsheet[13] or not billsheet[14] or not billsheet[15]:
+                #     return JsonResponse({'message': f'error occured in line {row_number}'})
+                
+                # if not billsheet[18] or not billsheet[19] or not billsheet[20] or not billsheet[22] or not billsheet[23]:
+                #     return JsonResponse({'message': f'error occured in line {row_number}'})
+
+                # if billsheet[23] == 'Yes':
+                #     if not billsheet[24] or not billsheet[25] or not billsheet[26] or not billsheet[27]:
+                #         return JsonResponse({'message': f'error occured in line {row_number}'})
+                        
+                # if not billsheet[28] or not billsheet[29]:
+                #     return JsonResponse({'message': f'error occured in line {row_number}'})
+
+                # if billsheet[29] == 'Yes':
+                #     if not billsheet[30] or not billsheet[31]:
+                #         return JsonResponse({'message': f'error occured in line {row_number}'})
+                        
+                # if not billsheet[32] or not billsheet[33] or not billsheet[34] or not billsheet[35] or not billsheet[36]:
+                #     return JsonResponse({'message': f'error occured in line {row_number}'})
+            
+
+                # payroll= Payroll(user=user, title=billsheet[0], first_name=billsheet[1], last_name=billsheet[2], joindate=billsheet[4], salaryrange=billsheet[5], 
+                #                     salary=billsheet[9], emp_number=billsheet[10], designation=billsheet[11], location=billsheet[12], gender=billsheet[13], 
+                #                     dob=billsheet[14], blood=billsheet[15], address=billsheet[18], permanent_address=billsheet[19], Phone=billsheet[20], 
+                #                     email=billsheet[22], ITN=billsheet[32], Aadhar=billsheet[33], UAN=billsheet[34], PFN=billsheet[35], PRAN=billsheet[36])
+                # payroll.save()
+
+                # birthdate_date = billsheet[14]
+                # current_date = datetime.now()
+                # age = current_date.year - birthdate_date.year - ((current_date.month, current_date.day) < (birthdate_date.month, birthdate_date.day))
+                # payroll.age = age
+
+                # if not billsheet[3]:
+                #     payroll.alias = ''
+                # else:
+                #     payroll.alias = billsheet[3]
+
+                # if billsheet[6] == 'Time Based':
+                #     payroll.salary_type = 'Variable'
+                #     payroll.amountperhr = billsheet[7]
+                #     payroll.workhr = billsheet[8]
+                # else:
+                #     payroll.salary_type = billsheet[6]
+                #     payroll.amountperhr = ''
+                #     payroll.workhr = ''
+
+                # if not billsheet[16]:
+                #     payroll.parent = ''
+                # else:
+                #     payroll.parent = billsheet[16]
+
+                # if not billsheet[17]:
+                #     payroll.spouse_name = ''
+                # else:
+                #     payroll.spouse_name = billsheet[17]
+
+                # if not billsheet[21]:
+                #     payroll.emergency_phone = ''
+                # else:
+                #     payroll.emergency_phone = billsheet[21]
+                
+                # if billsheet[23] == 'Yes':
+                #     Bankdetails.objects.create(payroll=payroll,acc_no=billsheet[24], IFSC=billsheet[25], bank_name=billsheet[26], 
+                #                                 branch=billsheet[27], transaction_type=billsheet[28])
+
+                # if billsheet[29] == 'Yes':
+                #     payroll.isTDS = billsheet[30]
+                #     payroll.TDS = billsheet[31]
+                # else:
+                #     payroll.isTDS = 'No'
+                #     payroll.TDS = 0
+
+                # payroll.image = 'image/img.png'
+                # payroll.save()
+
+            return JsonResponse({'success': 'File uploaded successfully!'})
+        except:
+            return JsonResponse({'message': 'File upload Failed!'})
+    else:
+        return JsonResponse({'message': 'File upload Failed!'})

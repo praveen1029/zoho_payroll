@@ -53,7 +53,7 @@
 
     .fixed-width-label {
         display: inline-block;
-        width: 150px;
+        width: 150px; 
         margin-right: 10px;
     }
 </style>
@@ -61,7 +61,7 @@
 <section>
     <div class="containerprof p-5">
         <div class="header pb-5">
-            <h2 class="mb-0 text-uppercase text-right">Additional Loan</h2>
+            <h2 class="mb-0 text-uppercase text-right">Edit Loan Repayment</h2>
             <hr>
             {% for message in messages %}
             <h5>
@@ -72,49 +72,50 @@
             {% endfor %}
         </div>
 
-        <form method="POST" action="{% url 'add_additional_loan' repay.loan.id %}" id="myForm" onsubmit="return validateform()">
+        <form method="POST" action="{% url 'edit_repayment' repay.id %}" id="myForm" onsubmit="return validateform()">
             {% csrf_token %}
             <div class="row">
                 <div class="data">
                     <div class="row pb-3">
+                        <div class="col-3">
+                            <label for="">Employee Name</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-dark bg-white" name="empname" id="empname" value="{{repay.loan.payroll.first_name}} {{repay.loan.payroll.last_name}}" readonly>                                
+                        </div>
+                    </div>
+                    <div class="row pb-3">
                         <div class="col-md-3">
-                            <label for="">Balance Loan Amount</label>
+                            <label for="">Pricipal Amount</label>
                         </div>
                         <div class=" col-5">
-                            <input type="number" class="form-control text-dark bg-light" name="bamnt" id="bamnt" value="{{repay.balance}}" readonly >
+                            <input type="number" class="form-control text-dark bg-light" name="pamnt" id="pamnt" value="{{repay.payment_made}}" onchange="gettotal()" required >
                         </div>
                     </div>
                     <div class="row pb-3">
                         <div class="col-3">
-                            <label for="">New Loan Amount</label>
+                            <label for="">Interest Amount</label>
                         </div>
                         <div class="col-5">
-                            <input type="number" class="form-control text-dark bg-light" name="namnt" id="namnt" value="0" onchange="gettotal()" required>
+                            <input type="number" class="form-control text-dark bg-light" name="interest" id="interest" value="{{repay.interest}}" onchange="gettotal()" required>
                         </div>
                     </div>
                     <div class="row pb-3">
                         <div class="col-3">
-                            <label for="">Total Loan Amount</label>
+                            <label for="">Payment Date</label>
                         </div>
                         <div class="col-5">
-                            <input type="number" class="form-control text-dark bg-light" name="total" id="total" value="{{repay.balance}}" readonly>
+                            <input type="date" class="form-control text-dark bg-light" name="paydate" id="paydate" value="{{repay.payment_date | date:'Y-m-d'}}">
                         </div>
                     </div>
-                    <div class="row pb-3">
-                        <div class="col-3">
-                            <label for="">Adjustment Date</label>
-                        </div>
-                        <div class="col-5">
-                            <input type="date" class="form-control text-dark bg-light" name="adjdate" id="adjdate" value="{{today}}">
-                        </div>
-                    </div>
+                    
                     <div class="row pb-3">
                         <div class="col-3">
                             <label for="">Payment Method</label>
                         </div>
                         <div class="col-5">
                             <select class="form-control text-dark bg-light" name="payment_method" id="payment_method" required>
-                                <option value="" selected hidden>Select</option>
+                                <option value="{{repay.payment_method}}" selected hidden>{{repay.payment_method}}</option>
                                 <option value="Cash">Cash</option>
                                 <option value="UPI">UPI</option>
                                 <option value="Cheque">Cheque</option>
@@ -124,6 +125,17 @@
                             </select>
                         </div>
                     </div>
+
+                    {% if repay.cheque_id %}
+                    <div class="row pb-3" id="chequediv">
+                        <div class="col-3">
+                            <label for="date2">Cheque ID</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="cheque_id" id="cheque_id" value="{{repay.cheque_id}}">
+                        </div>
+                    </div>  
+                    {% else %}
                     <div class="row pb-3" id="chequediv" style="display: none;">
                         <div class="col-3">
                             <label for="date2">Cheque ID</label>
@@ -132,6 +144,17 @@
                             <input type="text" class="form-control text-black bg-white" name="cheque_id" id="cheque_id">
                         </div>
                     </div>  
+                    {% endif %}
+                    {% if repay.upi_id %}
+                    <div class="row pb-3" id="upidiv">
+                        <div class="col-3">
+                            <label for="date2">UPI ID</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="upi_id" id="upi_id" value="{{repay.upi_id}}">
+                        </div>
+                    </div>  
+                    {% else %}
                     <div class="row pb-3" id="upidiv" style="display: none;">
                         <div class="col-3">
                             <label for="date2">UPI ID</label>
@@ -140,6 +163,17 @@
                             <input type="text" class="form-control text-black bg-white" name="upi_id" id="upi_id" >
                         </div>
                     </div>  
+                    {% endif %}
+                    {% if repay.bank_id %}
+                    <div class="row pb-3" id="bnkdiv">
+                        <div class="col-3">
+                            <label for="date2">Bank Account</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="bnk_id" id="bnk_id" value="{{repay.bank_id}}" readonly>
+                        </div>
+                    </div>  
+                    {% else %}
                     <div class="row pb-3" id="bnkdiv" style="display: none;">
                         <div class="col-3">
                             <label for="date2">Bank Account</label>
@@ -148,6 +182,15 @@
                             <input type="text" class="form-control text-black bg-white" name="bnk_id" id="bnk_id" readonly>
                         </div>
                     </div>  
+                    {% endif %}
+                    <div class="row pb-3" >
+                        <div class="col-3">
+                            <label for="total" class="mr-2 mb-0" style="width: 150px;">Total Amount</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="number" class="form-control text-dark bg-light" name="total" id="total" step="0.01" min="0" value="{{repay.total_payment}}" readonly>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="action-button">
@@ -204,14 +247,15 @@
 
 <script>
     function gettotal(){
-        bamnt = parseFloat($('#bamnt').val())
-        namnt = parseFloat($('#namnt').val())
-        if(namnt < 0 ){
-            $('#namnt').val(0)
-            $('#total').val('{{repay.balance}}')
+        pamnt = parseFloat($('#pamnt').val())
+        interest = parseFloat($('#interest').val())
+        if(pamnt < 0 || interest < 0 ){
+            $('#pamnt').val('{{loan.monthly_cutting_amount}}')
+            $('#interest').val(0)
+            $('#total').val('{{loan.monthly_cutting_amount}}')
             alert('Amount cannot be Negative')
         }else{
-            $('#total').val(bamnt+namnt)
+            $('#total').val(pamnt+interest)
         }
     }
 </script>

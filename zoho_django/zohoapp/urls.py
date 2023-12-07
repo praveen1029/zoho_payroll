@@ -614,6 +614,10 @@ urlpatterns = [
     path('additional_loan_view/<int:id>', views.additional_loan_view, name='additional_loan_view'), 
     path('add_additional_loan/<int:id>', views.add_additional_loan, name='add_additional_loan'), 
     path('delete_repayment/<int:id>', views.delete_repayment, name='delete_repayment'), 
+    path('edit_repayment_view/<int:id>', views.edit_repayment_view, name='edit_repayment_view'), 
+    path('edit_repayment/<int:id>', views.edit_repayment, name='edit_repayment'), 
+    path('edit_additional_loan_view/<int:id>', views.edit_additional_loan_view, name='edit_additional_loan_view'), 
+    path('edit_additional_loan/<int:id>', views.edit_additional_loan, name='edit_additional_loan'),  
 
     path('sort_product_name/<int:id>', views.sort_product_name, name='sort_product_name'),
     path('sort_product_hsn/<int:id>', views.sort_product_hsn, name='sort_product_hsn'),
@@ -990,8 +994,9 @@ urlpatterns = [
     path('create_loan_duration',views.create_loan_duration,name='create_loan_duration'), 
     path('loan_duration',views.loan_duration,name='loan_duration'), 
 
+    path('import_loan_details', views.import_loan_details, name='import_loan_details'), 
+    path('import_employee_details',views.import_employee_details,name='import_employee_details'),
 
-    path('import_employee_details',views.import_employee_details,name='import_employee_details'), 
 
     
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
