@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load social_share %}
 {% block content %}
 
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -109,6 +110,10 @@
     content: counter(rowNumber);
   }
 
+  #sharelink:hover #share {
+    display: block;
+  }
+
   ::-webkit-scrollbar{
     display: none;
   }
@@ -205,7 +210,7 @@
                   data-toggle="tooltip" title="Download Attachments" aria-expanded="false" role="button">
                 <i class="fas fa-download"></i>
               </a>
-              <div class="dropdown-menu">
+              <div class="dropdown-menu" id="dd1">
                 {% if attach %}
                   <table class="table table-borderless">
                     {% for a in attach %}
@@ -560,6 +565,14 @@
               <label for="file-input" class="btn btn-outline-warning" data-toggle="tooltip" title="Upload Attachments">
                   <i class="fas fa-paperclip"></i>
               </label>
+              <a class="btn btn-outline-warning" href="" id="sharelink" data-bs-toggle="dropdown" aria-haspopup="true"
+              data-toggle="tooltip" title="Download Attachments" aria-expanded="false" role="button">
+                <i class="fas fa-share"></i>
+              </a>
+              <div class="dropdown-menu " id="sharelink" >
+                <a class="dropdown-item" href="#shareBillEmail" data-bs-toggle="modal">Mail</a>
+                <a class="dropdown-item" href="whatsapp://send?text=Check out this website: [Your URL]" data-action="share/whatsapp/share">WhatsApp</a>
+              </div>
             </div>
 
             <div id="printdiv" class="mt-3" style="overflow-y: scroll;height: 600px;width: 100%; margin-left: -1vh">
@@ -701,6 +714,36 @@
                   <button type="submit" class="btn btn-outline-warning">Save</button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="shareBillEmail" tabindex="-1" aria-labelledby="shareBillEmailLabel" aria-hidden="true" style="margin-top: 8vh;">
+          <div class="modal-dialog">
+            <div class="modal-content" style="background-color: #3b3b3b;">
+              <div class="modal-header">
+                <h5 class="modal-title" id="shareBillEmailLabel">Share Bill Via Email</h5>
+                <button type="button" class="btn"  data-bs-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true" style="font-size: x-large;" >&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form action="{% url 'share_loan_email' loan.id %}" method="post" class="needs-validation" id="share_to_email_form">
+                  {% csrf_token %}
+                  <div class="form-group">
+                      <label for="emailIds">Email IDs</label>
+                      <textarea class="form-control text-dark" name="email_ids" id="emailIds" rows="3" placeholder="Multiple emails can be added by separating with a comma(,)." required></textarea>
+                  </div>
+                  <div class="form-group mt-2">
+                      <label for="item_unitname">Message(optional)</label>
+                      <textarea name="email_message" id="email_message" class="form-control text-dark" cols="" rows="4" placeholder="This message will be sent along with Bill details."></textarea>
+                  </div>
+                  <div class="modal-footer d-flex justify-content-center">
+                    <button type="submit" id="share_with_email" class="btn btn-outline-warning w-50 text-uppercase">SEND MAIL</button>
+                  </div>
+                </form>
+              </div>
+
             </div>
           </div>
         </div>

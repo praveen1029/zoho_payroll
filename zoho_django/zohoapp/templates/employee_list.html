@@ -132,6 +132,7 @@
             <th>PAYMENT ID</th>
             <th>PAYMENT TYPE</th>
             <th>PERCENTAGE</th>
+            <th>MONTHLY CUTTING AMOUNT</th>
             <th>NOTE</th>
           </thead>
           <tbody>
@@ -144,6 +145,7 @@
             <td>Cash/UPI/Cheque/Bank Name</td>
             <td>UPI NO/Cheque NO/Bank Account NO</td>
             <td>Amount/Percentage</td>
+            <td></td>
             <td></td>
             <td></td>
           </tbody>
@@ -281,11 +283,11 @@
 
 <script>
   function sampleexcel(){
-    // const table1 = document.querySelector('#employeeloanmodeltable');
-    // const ws1 = XLSX.utils.table_to_sheet(table1);
-    // const wb1 = XLSX.utils.book_new();
-    // XLSX.utils.book_append_sheet(wb1, ws1, 'Sheet1');
-    // XLSX.writeFile(wb1, 'EmployeLoanModel.xlsx');
+    const table1 = document.querySelector('#employeeloanmodeltable');
+    const ws1 = XLSX.utils.table_to_sheet(table1);
+    const wb1 = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb1, ws1, 'Sheet1');
+    XLSX.writeFile(wb1, 'EmployeLoanModel.xlsx');
   }
 </script>
 
@@ -294,7 +296,7 @@
     const form = document.getElementById('excelForm');
     const formData = new FormData(form);
       
-    fetch('import_loan_details', {
+    fetch('/import_employee_loan_details', {
       method: 'POST',
       body: formData
     })
@@ -324,7 +326,7 @@
     .then(response => {
       setTimeout(function () {
         location.reload();
-      }, 1400);
+      }, 1500);
     })
   }
 </script>

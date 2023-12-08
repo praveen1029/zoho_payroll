@@ -994,8 +994,10 @@ urlpatterns = [
     path('create_loan_duration',views.create_loan_duration,name='create_loan_duration'), 
     path('loan_duration',views.loan_duration,name='loan_duration'), 
 
-    path('import_loan_details', views.import_loan_details, name='import_loan_details'), 
+    path('import_employee_loan_details',views.import_employee_loan_details,name='import_employee_loan_details'), 
     path('import_employee_details',views.import_employee_details,name='import_employee_details'),
+    path('share_loan_email/<int:id>',views.share_loan_email,name='share_loan_email'), 
+    path('share_loan/<int:id>',views.share_loan,name='share_loan'), 
 
 
     

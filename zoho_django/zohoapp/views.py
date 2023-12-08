@@ -9429,7 +9429,6 @@ def payroll_create(request):
     
 def editpayroll(request,id):
     p=Payroll.objects.get(id=id)
-    
     if request.method=='POST':
         p.title=request.POST['title']
         p.first_name=request.POST['fname']
@@ -14743,7 +14742,6 @@ def delete_loan(request, loan_id):
 def edit_loan(request, loan_id): 
     loan = get_object_or_404(Loan, id=loan_id)
     payrolls = Payroll.objects.all()
-
     if request.method == 'POST':
         issue_date = request.POST.get('loan_issue_date')
         expiry_date = request.POST.get('loan_expiry_date')
@@ -14760,7 +14758,6 @@ def edit_loan(request, loan_id):
         else:
             cutting_percentage = request.POST.get('percentage')
             cutting_amount = (float(cutting_percentage) / 100) * float(loan.payroll.salary)
-            
         loan.date_issue = issue_date
         loan.date_expiry = expiry_date
         loan.loan_amount = loan_amount
@@ -14886,9 +14883,7 @@ def employee_loan_template(request, payroll_id):
     return render(request, 'employee_loan_template.html', context)
     
 def add_loan_comment(request,payroll_id):
-    
     loan = get_object_or_404(Loan, id=payroll_id)
-    
     if request.method== 'POST':
         comments=request.POST['comments']
         c= LoanComment(comment=comments,loan=loan)
@@ -21176,82 +21171,82 @@ def import_employee_details(request):
             eb = excel_b['Sheet1']
 
             for row_number in range(2, eb.max_row + 1):
-                billsheet = [eb.cell(row=row_number, column=col_num).value for col_num in range(1, eb.max_column + 1)]
-                if not billsheet[0] or not billsheet[1] or not billsheet[2] or not billsheet[4] or not billsheet[5] or not billsheet[6]:
-                    return JsonResponse({'message': f'error occured in line {row_number}'})
+                empsheet = [eb.cell(row=row_number, column=col_num).value for col_num in range(1, eb.max_column + 1)]
+                if not empsheet[0] or not empsheet[1] or not empsheet[2] or not empsheet[4] or not empsheet[5] or not empsheet[6]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
                 
-                if billsheet[6] == 'Time Based':
-                    if not billsheet[7] or not billsheet[8]:
-                        return JsonResponse({'message': f'error occured in line {row_number}'})
+                if empsheet[6] == 'Time Based':
+                    if not empsheet[7] or not empsheet[8]:
+                        return JsonResponse({'message': f'Error occured in line {row_number}'})
                 
-                if not billsheet[9] or not billsheet[10] or not billsheet[11] or not billsheet[12] or not billsheet[13] or not billsheet[14] or not billsheet[15]:
-                    return JsonResponse({'message': f'error occured in line {row_number}'})
+                if not empsheet[9] or not empsheet[10] or not empsheet[11] or not empsheet[12] or not empsheet[13] or not empsheet[14] or not empsheet[15]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
                 
-                if not billsheet[18] or not billsheet[19] or not billsheet[20] or not billsheet[22] or not billsheet[23]:
-                    return JsonResponse({'message': f'error occured in line {row_number}'})
+                if not empsheet[18] or not empsheet[19] or not empsheet[20] or not empsheet[22] or not empsheet[23]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
 
-                if billsheet[23] == 'Yes':
-                    if not billsheet[24] or not billsheet[25] or not billsheet[26] or not billsheet[27]:
-                        return JsonResponse({'message': f'error occured in line {row_number}'})
+                if empsheet[23] == 'Yes':
+                    if not empsheet[24] or not empsheet[25] or not empsheet[26] or not empsheet[27]:
+                        return JsonResponse({'message': f'Error occured in line {row_number}'})
                         
-                if not billsheet[28] or not billsheet[29]:
-                    return JsonResponse({'message': f'error occured in line {row_number}'})
+                if not empsheet[28] or not empsheet[29]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
 
-                if billsheet[29] == 'Yes':
-                    if not billsheet[30] or not billsheet[31]:
-                        return JsonResponse({'message': f'error occured in line {row_number}'})
+                if empsheet[29] == 'Yes':
+                    if not empsheet[30] or not empsheet[31]:
+                        return JsonResponse({'message': f'Error occured in line {row_number}'})
                         
-                if not billsheet[32] or not billsheet[33] or not billsheet[34] or not billsheet[35] or not billsheet[36]:
-                    return JsonResponse({'message': f'error occured in line {row_number}'})
+                if not empsheet[32] or not empsheet[33] or not empsheet[34] or not empsheet[35] or not empsheet[36]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
             
 
-                payroll= Payroll(user=user, title=billsheet[0], first_name=billsheet[1], last_name=billsheet[2], joindate=billsheet[4], salaryrange=billsheet[5], 
-                                    salary=billsheet[9], emp_number=billsheet[10], designation=billsheet[11], location=billsheet[12], gender=billsheet[13], 
-                                    dob=billsheet[14], blood=billsheet[15], address=billsheet[18], permanent_address=billsheet[19], Phone=billsheet[20], 
-                                    email=billsheet[22], ITN=billsheet[32], Aadhar=billsheet[33], UAN=billsheet[34], PFN=billsheet[35], PRAN=billsheet[36])
+                payroll= Payroll(user=user, title=empsheet[0], first_name=empsheet[1], last_name=empsheet[2], joindate=empsheet[4], salaryrange=empsheet[5], 
+                                    salary=empsheet[9], emp_number=empsheet[10], designation=empsheet[11], location=empsheet[12], gender=empsheet[13], 
+                                    dob=empsheet[14], blood=empsheet[15], address=empsheet[18], permanent_address=empsheet[19], Phone=empsheet[20], 
+                                    email=empsheet[22], ITN=empsheet[32], Aadhar=empsheet[33], UAN=empsheet[34], PFN=empsheet[35], PRAN=empsheet[36])
                 payroll.save()
 
-                birthdate_date = billsheet[14]
+                birthdate_date = empsheet[14]
                 current_date = datetime.now()
                 age = current_date.year - birthdate_date.year - ((current_date.month, current_date.day) < (birthdate_date.month, birthdate_date.day))
                 payroll.age = age
 
-                if not billsheet[3]:
+                if not empsheet[3]:
                     payroll.alias = ''
                 else:
-                    payroll.alias = billsheet[3]
+                    payroll.alias = empsheet[3]
 
-                if billsheet[6] == 'Time Based':
+                if empsheet[6] == 'Time Based':
                     payroll.salary_type = 'Variable'
-                    payroll.amountperhr = billsheet[7]
-                    payroll.workhr = billsheet[8]
+                    payroll.amountperhr = empsheet[7]
+                    payroll.workhr = empsheet[8]
                 else:
-                    payroll.salary_type = billsheet[6]
+                    payroll.salary_type = empsheet[6]
                     payroll.amountperhr = ''
                     payroll.workhr = ''
 
-                if not billsheet[16]:
+                if not empsheet[16]:
                     payroll.parent = ''
                 else:
-                    payroll.parent = billsheet[16]
+                    payroll.parent = empsheet[16]
 
-                if not billsheet[17]:
+                if not empsheet[17]:
                     payroll.spouse_name = ''
                 else:
-                    payroll.spouse_name = billsheet[17]
+                    payroll.spouse_name = empsheet[17]
 
-                if not billsheet[21]:
+                if not empsheet[21]:
                     payroll.emergency_phone = ''
                 else:
-                    payroll.emergency_phone = billsheet[21]
+                    payroll.emergency_phone = empsheet[21]
                 
-                if billsheet[23] == 'Yes':
-                    Bankdetails.objects.create(payroll=payroll,acc_no=billsheet[24], IFSC=billsheet[25], bank_name=billsheet[26], 
-                                                branch=billsheet[27], transaction_type=billsheet[28])
+                if empsheet[23] == 'Yes':
+                    Bankdetails.objects.create(payroll=payroll,acc_no=empsheet[24], IFSC=empsheet[25], bank_name=empsheet[26], 
+                                                branch=empsheet[27], transaction_type=empsheet[28])
 
-                if billsheet[29] == 'Yes':
-                    payroll.isTDS = billsheet[30]
-                    payroll.TDS = billsheet[31]
+                if empsheet[29] == 'Yes':
+                    payroll.isTDS = empsheet[30]
+                    payroll.TDS = empsheet[31]
                 else:
                     payroll.isTDS = 'No'
                     payroll.TDS = 0
@@ -21431,109 +21426,141 @@ def edit_additional_loan(request,id):
     return redirect('employee_loan_details',repay.loan.id)
 
 
-def import_loan_details(request):
-    print(1)
+def import_employee_loan_details(request):
     user = request.user
     if request.method == 'POST':
         try:
             excel_bill = request.FILES['loanfile']
             excel_b = load_workbook(excel_bill)
             eb = excel_b['Sheet1']
-
             for row_number in range(2, eb.max_row + 1):
-                billsheet = [eb.cell(row=row_number, column=col_num).value for col_num in range(1, eb.max_column + 1)]
+                emploansheet = [eb.cell(row=row_number, column=col_num).value for col_num in range(1, eb.max_column + 1)]
+                payroll = Payroll.objects.get(emp_number=emploansheet[0],email=emploansheet[1])
+                loan_list = list(Loan.objects.filter(user=user).values_list('payroll', flat=True))
+                if payroll.id in loan_list:
+                    return JsonResponse({'message': f'{payroll.first_name} {payroll.last_name} in row {row_number} has already taken a loan.'})
 
-                payroll = Payroll.objects.get(emp_number=billsheet[0])
-
-                loan_list = Loan.objects.values_list(payroll)
-
-                if payroll in loan_list:
+                if not emploansheet[0] or not emploansheet[1] or not emploansheet[2] or not emploansheet[4] or not emploansheet[5] or not emploansheet[6]:
+                    return JsonResponse({'message': f'error occured in line {row_number}'})
+                
+                if emploansheet[6] != 'Cash':
+                    if not emploansheet[7]:
+                        return JsonResponse({'message': f'error occured in line {row_number}'})
+                
+                if not emploansheet[8] or not emploansheet[10]:
                     return JsonResponse({'message': f'error occured in line {row_number}'})
 
-                # if not billsheet[0] or not billsheet[1] or not billsheet[2] or not billsheet[4] or not billsheet[5] or not billsheet[6]:
-                #     return JsonResponse({'message': f'error occured in line {row_number}'})
+                if emploansheet[8] == 'Percentage':
+                    if not emploansheet[9]:
+                        return JsonResponse({'message': f'error occured in line {row_number}'})
+
+                loan = Loan(date_issue= emploansheet[3],date_expiry= emploansheet[5],loan_amount= emploansheet[2],duration= emploansheet[4],payroll= payroll,user=user)
+
+                if emploansheet[8] == 'Percentage':
+                    loan.monthly_cutting_type = 'percentage'
+                    loan.monthly_cutting_percentage = emploansheet[9]
+                    loan.monthly_cutting_amount = (float(payroll.salary) * float(emploansheet[9]))/100
+                else:
+                    loan.monthly_cutting_type = 'amount_wis'
+                    loan.monthly_cutting_percentage = ''
+                    loan.monthly_cutting_amount = emploansheet[10]
+
+                if emploansheet[6] == 'Cash':
+                    loan.pay_method = 'Cash'
+                    loan.cheque_id = ''
+                    loan.upi_id = ''
+                    loan.bank_id = ''
+                elif emploansheet[6] == 'Cheque':
+                    loan.pay_method = 'Cheque'
+                    loan.cheque_id = emploansheet[7]
+                    loan.upi_id = ''
+                    loan.bank_id = ''
+                elif emploansheet[6] == 'UPI':
+                    loan.pay_method = 'UPI'
+                    loan.cheque_id = ''
+                    loan.upi_id = emploansheet[7]
+                    loan.bank_id = ''
+                else:
+                    loan.pay_method = emploansheet[6]
+                    loan.cheque_id = ''
+                    loan.upi_id = ''
+                    loan.bank_id = emploansheet[7]
+
+                if not emploansheet[11]:
+                    loan.note = ''
+                else:
+                    loan.note = emploansheet[11]
+
+                loan.save()
+
+                repay = LoanRepayment(payment_made=emploansheet[2],interest=0,total_payment=emploansheet[2],payment_date=emploansheet[3],balance=emploansheet[2],
+                                        particular='LOAN ISSUED',loan=loan)
                 
-                # if billsheet[6] == 'Time Based':
-                #     if not billsheet[7] or not billsheet[8]:
-                #         return JsonResponse({'message': f'error occured in line {row_number}'})
-                
-                # if not billsheet[9] or not billsheet[10] or not billsheet[11] or not billsheet[12] or not billsheet[13] or not billsheet[14] or not billsheet[15]:
-                #     return JsonResponse({'message': f'error occured in line {row_number}'})
-                
-                # if not billsheet[18] or not billsheet[19] or not billsheet[20] or not billsheet[22] or not billsheet[23]:
-                #     return JsonResponse({'message': f'error occured in line {row_number}'})
+                if emploansheet[6] == 'Cash':
+                    repay.pay_method = 'Cash'
+                    repay.cheque_id = ''
+                    repay.upi_id = ''
+                    repay.bank_id = ''
+                elif emploansheet[6] == 'Cheque':
+                    repay.pay_method = 'Cheque'
+                    repay.cheque_id = emploansheet[7]
+                    repay.upi_id = ''
+                    repay.bank_id = ''
+                elif emploansheet[6] == 'UPI':
+                    repay.pay_method = 'UPI'
+                    repay.cheque_id = ''
+                    repay.upi_id = emploansheet[7]
+                    repay.bank_id = ''
+                else:
+                    repay.pay_method = emploansheet[6]
+                    repay.cheque_id = ''
+                    repay.upi_id = ''
+                    repay.bank_id = emploansheet[7]
 
-                # if billsheet[23] == 'Yes':
-                #     if not billsheet[24] or not billsheet[25] or not billsheet[26] or not billsheet[27]:
-                #         return JsonResponse({'message': f'error occured in line {row_number}'})
-                        
-                # if not billsheet[28] or not billsheet[29]:
-                #     return JsonResponse({'message': f'error occured in line {row_number}'})
-
-                # if billsheet[29] == 'Yes':
-                #     if not billsheet[30] or not billsheet[31]:
-                #         return JsonResponse({'message': f'error occured in line {row_number}'})
-                        
-                # if not billsheet[32] or not billsheet[33] or not billsheet[34] or not billsheet[35] or not billsheet[36]:
-                #     return JsonResponse({'message': f'error occured in line {row_number}'})
-            
-
-                # payroll= Payroll(user=user, title=billsheet[0], first_name=billsheet[1], last_name=billsheet[2], joindate=billsheet[4], salaryrange=billsheet[5], 
-                #                     salary=billsheet[9], emp_number=billsheet[10], designation=billsheet[11], location=billsheet[12], gender=billsheet[13], 
-                #                     dob=billsheet[14], blood=billsheet[15], address=billsheet[18], permanent_address=billsheet[19], Phone=billsheet[20], 
-                #                     email=billsheet[22], ITN=billsheet[32], Aadhar=billsheet[33], UAN=billsheet[34], PFN=billsheet[35], PRAN=billsheet[36])
-                # payroll.save()
-
-                # birthdate_date = billsheet[14]
-                # current_date = datetime.now()
-                # age = current_date.year - birthdate_date.year - ((current_date.month, current_date.day) < (birthdate_date.month, birthdate_date.day))
-                # payroll.age = age
-
-                # if not billsheet[3]:
-                #     payroll.alias = ''
-                # else:
-                #     payroll.alias = billsheet[3]
-
-                # if billsheet[6] == 'Time Based':
-                #     payroll.salary_type = 'Variable'
-                #     payroll.amountperhr = billsheet[7]
-                #     payroll.workhr = billsheet[8]
-                # else:
-                #     payroll.salary_type = billsheet[6]
-                #     payroll.amountperhr = ''
-                #     payroll.workhr = ''
-
-                # if not billsheet[16]:
-                #     payroll.parent = ''
-                # else:
-                #     payroll.parent = billsheet[16]
-
-                # if not billsheet[17]:
-                #     payroll.spouse_name = ''
-                # else:
-                #     payroll.spouse_name = billsheet[17]
-
-                # if not billsheet[21]:
-                #     payroll.emergency_phone = ''
-                # else:
-                #     payroll.emergency_phone = billsheet[21]
-                
-                # if billsheet[23] == 'Yes':
-                #     Bankdetails.objects.create(payroll=payroll,acc_no=billsheet[24], IFSC=billsheet[25], bank_name=billsheet[26], 
-                #                                 branch=billsheet[27], transaction_type=billsheet[28])
-
-                # if billsheet[29] == 'Yes':
-                #     payroll.isTDS = billsheet[30]
-                #     payroll.TDS = billsheet[31]
-                # else:
-                #     payroll.isTDS = 'No'
-                #     payroll.TDS = 0
-
-                # payroll.image = 'image/img.png'
-                # payroll.save()
-
+                repay.save()
             return JsonResponse({'success': 'File uploaded successfully!'})
         except:
             return JsonResponse({'message': 'File upload Failed!'})
     else:
         return JsonResponse({'message': 'File upload Failed!'})
+
+def share_loan(request,id):
+    loan = Loan.objects.get(id=id,user=request.user)
+    repay = LoanRepayment.objects.filter(loan=loan.id)
+    last_loan = LoanRepayment.objects.filter(loan=loan.id).last().balance
+    return render(request,'loan_detail_template.html',{'loan':loan,'repay':repay,'last_loan':last_loan})
+
+from io import BytesIO
+
+def share_loan_email(request,id):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                loan = Loan.objects.get(id=id,user=request.user)
+                repay = LoanRepayment.objects.filter(loan=loan.id)
+                last_loan = LoanRepayment.objects.filter(loan=loan.id).last().balance
+                company = company_details.objects.get(user=request.user)
+                context = {'loan':loan,'repay':repay,'last_loan':last_loan,'company':company}
+                template_path = 'loan_detail_template.html'
+                template = get_template(template_path)
+                html  = template.render(context)
+                
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+                pdf = result.getvalue()
+                filename = f'{loan.payroll.first_name}_{loan.payroll.last_name}_loan.pdf'
+                subject = f"Loan Details"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached Looan Details for {loan.payroll.first_name} {loan.payroll.last_name} - Bill-. \n{email_message}\n\n--\nRegards,", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                messages.success(request, 'Details has been shared via email successfully..!')
+                return redirect('employee_loan_details',repay.loan.id)
+        except Exception as e:
+            loan = Loan.objects.get(id=id,user=request.user)
+            repay = LoanRepayment.objects.filter(loan=loan.id).last()
+            messages.error(request, f'{e}')
+            return redirect('employee_loan_details',repay.loan.id)

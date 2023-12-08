@@ -60,7 +60,7 @@
 <section>
     <div class="containerprof p-5">
         <div class="header pb-5">
-            <h2 class="mb-0 text-uppercase text-right">CREATE EMPLOYEE LOAN</h2>
+            <h2 class="mb-0 text-uppercase text-right">EDIT EMPLOYEE LOAN</h2>
             <hr>
         </div>
         <form method="POST" action="{% url 'edit_loan' loan.id %}" id="myForm" onsubmit="return validateform()">
@@ -239,7 +239,7 @@
                             </select>
                         </div>
                     </div>
-                    {% if loan.monthly_cutting_percentage != '0.00' %}
+                    {% if loan.monthly_cutting_percentage != 0.00 %}
                     <div id="percentageWiseFields">
                         <div class="row pb-3">
                             <div class="col-3" >
@@ -340,23 +340,6 @@
             </div>
         </div>  
     </div>  
-
-    {% if error_message %}
-        <div class="alert alert-danger" id="error-message">
-            {{ error_message }}
-        </div>
-    {% endif %}           
-      
-    <div class="text-center">
-        {% for message in messages %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert" id="alert">
-            <strong>{{message}}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        {% endfor %}
-    </div>
 </section>
 
 <script>
