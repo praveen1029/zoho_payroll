@@ -200,7 +200,7 @@
               <label for="file-input" class="btn btn-outline-warning" data-toggle="tooltip" title="Upload Attachments">
                   <i class="fas fa-paperclip"></i>
               </label>
-              <a href="" class="  text-dark" >
+              <a href="{% url 'payroll_delete' p.id %}" class="  text-dark" >
                 <button class="btn btn-outline-warning"  title="Delete"><i class="fas fa-trash-alt"></i></button>
               </a>
               <input id="file-input" type="file" name="file" style="display:none;" onchange="uploadFile()">

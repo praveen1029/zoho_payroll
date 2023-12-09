@@ -9596,25 +9596,21 @@ def createpayroll(request):
         
 def payroll_list(request):
     company=company_details.objects.get(user=request.user)
-    p=Payroll.objects.all()
+    p=Payroll.objects.filter(user=request.user)
     return render(request,'payroll_list.html',{'pay':p,'company':company})
-    
     
 def payroll_delete(request,pid):
     p=Payroll.objects.get(id=pid)
     p.delete()
     return redirect('payroll_list')
     
-    
 def payroll_view(request,id):
-    payroll=Payroll.objects.all()
+    payroll=Payroll.objects.filter(user=request.user)
     p=Payroll.objects.get(id=id)
     com=Commentmodel.objects.filter(payroll=p)
     b=Bankdetails.objects.filter(payroll=p)
     attach=Payrollfiles.objects.filter(payroll=p)
     company=company_details.objects.get(user=request.user)
-    print(p)
-    print(attach)
     return render(request,'payroll_view.html',{'pay':payroll,'p':p,'b':b,'com':com,'attach':attach,'company':company})
 
 def payroll_active(request,id):
@@ -21334,7 +21330,7 @@ def add_additional_loan(request,id):
 
         loan = Loan.objects.get(id=id)
 
-        rep = LoanRepayment(payment_made=namnt,interest=0,total_payment = 0,payment_date=adjdate,payment_method=pmethod, cheque_id=cheque_id,upi_id=upi_id,
+        rep = LoanRepayment(payment_made=namnt,interest=0,total_payment=namnt,payment_date=adjdate,payment_method=pmethod, cheque_id=cheque_id,upi_id=upi_id,
                             bank_id=bank_id,balance=total,particular='ADDITIONAL LOAN ISSUED',loan=loan)
         rep.save()
         return redirect('employee_loan_details',id)

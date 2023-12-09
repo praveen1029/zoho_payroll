@@ -53,7 +53,7 @@
             <h2>CREATE EMPLOYEE</h2>
             <hr>
         </div>
-        <form method="POST" action="{% url 'createpayroll' %}" enctype="multipart/form-data" id="myForm">
+        <form method="POST" action="{% url 'createpayroll' %}" enctype="multipart/form-data" id="myForm" onsubmit="return validateform()">
             {% csrf_token %}
             <div class="row">
                 <div class="data col-6 col-lg-6 col-md-6 col-sm-12">
@@ -135,7 +135,7 @@
                                 <label for="">Salary Amount</label>
                             </div>
                             <div class="col-6">
-                                <input type="number" class="form-control text-dark bg-light" name="fsalary" id="fsalary" required>
+                                <input type="number" class="form-control text-dark bg-light" name="fsalary" id="fsalary">
                             </div>
                         </div>
                     </div>
@@ -145,7 +145,7 @@
                                 <label for="">Amount per Hour</label>
                             </div>
                             <div class="col-6">
-                                <input type="number" class="form-control text-dark bg-light" name="amnthr" id="amnthr" required>
+                                <input type="number" class="form-control text-dark bg-light" name="amnthr" id="amnthr">
                             </div>
                         </div>
                         <div class="row pb-3">
@@ -153,7 +153,7 @@
                                 <label for="">Total working Hours</label>
                             </div>
                             <div class="col-6">
-                                <input type="number" class="form-control text-dark bg-light" name="hours" id="hours" onkeyup="calculateAmount()" required>
+                                <input type="number" class="form-control text-dark bg-light" name="hours" id="hours" onkeyup="calculateAmount()">
                             </div>
                         </div>
                         <div class="row pb-3">
@@ -161,7 +161,7 @@
                                 <label for="">Salary Amount</label>
                             </div>
                             <div class="col-6">
-                                <input type="number" class="form-control text-dark bg-light" name="vsalary" id="vsalary" required>
+                                <input type="number" class="form-control text-dark bg-light" name="vsalary" id="vsalary" readonly>
                             </div>
                         </div>
                     </div>
@@ -279,7 +279,7 @@
                             <label for="">Permanent Address</label>
                         </div>
                         <div class="col-6">
-                            <textarea class="form-control text-dark bg-light mb-2 pt-0" name="paddress" id="padrs1" required onkeyup="clearaddreass(this.id)"></textarea>
+                            <textarea class="form-control text-dark bg-light mb-2 pt-0" name="paddress" id="padrs1" onkeyup="clearaddreass(this.id)" required></textarea>
                             <textarea class="form-control text-dark bg-light pt-0" name="paddress2" id="padrs2" onkeyup="clearaddreass(this.id)"></textarea>
                         </div>
                     </div>
@@ -290,7 +290,7 @@
                         <div class="col-6">
                             <input class="mx-2" type="checkbox" id="filladdress" name="filladdress">
                             <label style="font-size: .8rem;">Same as permanent address</label>
-                            <textarea class="form-control text-dark bg-light mb-2 pt-0" name="address" id="adrs1" required onkeyup="clearaddreass(this.id)"></textarea>
+                            <textarea class="form-control text-dark bg-light mb-2 pt-0" name="address" id="adrs1" onkeyup="clearaddreass(this.id)"></textarea>
                             <textarea class="form-control text-dark bg-light pt-0" name="address2" id="adrs2" onkeyup="clearaddreass(this.id)"></textarea>
                         </div>
                     </div>
@@ -355,7 +355,7 @@
                                 <label for="">Account Number</label>
                             </div>
                             <div class="col-6">
-                                <input type="number" class="form-control text-dark bg-light" name="acc_no" id="acc_no" pattern="[0-9]{15}" required>
+                                <input type="number" class="form-control text-dark bg-light" name="acc_no" id="acc_no" pattern="[0-9]{15}">
                             </div>
                         </div>
                         <div class="row pb-3">
@@ -363,7 +363,7 @@
                                 <label for="">IFSC</label>
                             </div>
                             <div class="col-6">
-                                <input type="text" class="form-control text-dark bg-light" name="ifsc" id="ifsc" required>
+                                <input type="text" class="form-control text-dark bg-light" name="ifsc" id="ifsc">
                             </div>
                         </div>
                         <div class="row pb-3">
@@ -371,7 +371,7 @@
                                 <label for="">Name of Bank</label>
                             </div>
                             <div class="col-6">
-                                <input type="text" class="form-control text-dark bg-light" name="b_name" id="b_name" required>
+                                <input type="text" class="form-control text-dark bg-light" name="b_name" id="b_name">
                             </div>
                         </div>
                         <div class="row pb-3">
@@ -379,7 +379,7 @@
                                 <label for="">Branch Name</label>
                             </div>
                             <div class="col-6">
-                                <input type="text" class="form-control text-dark bg-light" name="branch" id="branch" required>
+                                <input type="text" class="form-control text-dark bg-light" name="branch" id="branch">
                             </div>
                         </div>
                         <h5 class="text-center py-1">For Banking</h5>
@@ -388,7 +388,7 @@
                                 <label for="">Transaction Type</label>
                             </div>
                             <div class="col-6">
-                                <select class="form-control text-dark bg-light" name="ttype" id="ttype" required>
+                                <select class="form-control text-dark bg-light" name="ttype" id="ttype">
                                     <option value="" selected hidden>Select</option>
                                     <option value="ATM">ATM</option>
                                     <option value="Cash">Cash</option>
@@ -416,7 +416,7 @@
                                 <label for="">Percentage/Amount</label>
                             </div>
                             <div class="col-6">
-                                <select class="form-control text-dark bg-light" name="pora" id="pora" onchange="tdsFunction2()" required>
+                                <select class="form-control text-dark bg-light" name="pora" id="pora" onchange="tdsFunction2()">
                                     <option value="" selected hidden>Select</option>
                                     <option value="Percentage">Percentage</option>
                                     <option value="Amount">Amount</option>
@@ -429,7 +429,7 @@
                                     <label for="">Percentage</label>
                                 </div>
                                 <div class="col-6">
-                                    <input type="number" class="form-control text-dark bg-light" name="pcnt" id="pcnt" required>
+                                    <input type="number" class="form-control text-dark bg-light" name="pcnt" id="pcnt">
                                 </div>
                             </div>
                         </div>
@@ -439,7 +439,7 @@
                                     <label for="">Amount</label>
                                 </div>
                                 <div class="col-6">
-                                    <input type="number" class="form-control text-dark bg-light" name="amnt" id="amnt" required>
+                                    <input type="number" class="form-control text-dark bg-light" name="amnt" id="amnt">
                                 </div>
                             </div>
                         </div>
@@ -495,6 +495,85 @@
         </form>
     </div>
 </section>
+
+<script>
+    function validateform() {
+        var sal = document.getElementById('sal').value;
+        var amnthr = document.getElementById('amnthr').value;
+        var hours = document.getElementById('hours').value;
+        var fsalary = document.getElementById('fsalary').value;
+
+        var dropId = document.getElementById('dropId').value;
+        var acc_no = document.getElementById('acc_no').value;
+        var ifsc = document.getElementById('ifsc').value;
+        var b_name = document.getElementById('b_name').value;
+        var branch = document.getElementById('branch').value;
+        var ttype = document.getElementById('ttype').value;
+
+        var tds = document.getElementById('tds').value;
+        var pora = document.getElementById('pora').value;
+        var pcnt = document.getElementById('pcnt').value;
+        var amnt = document.getElementById('amnt').value;
+
+        if (sal === 'Variable'){
+            if (amnthr === ''){
+                alert('Add Amount per Hour');
+                return false;
+            }
+            if (hours === ''){
+                alert('Add Total Amount Worked');
+                return false;
+            }
+        }else{
+            if (fsalary === ''){
+                alert('Add Salary');
+                return false;
+            }
+        }
+
+        if (dropId === '1'){
+            if (acc_no === ''){
+                alert('Add an Account Number');
+                return false;
+            }
+            if (ifsc === ''){
+                alert('Add IFSC code');
+                return false;
+            }
+            if (b_name === ''){
+                alert('Add Bank Name');
+                return false;
+            }
+            if (branch === ''){
+                alert('Add Branch Name');
+                return false;
+            }
+            if (ttype === ''){
+                alert('Select a Transaction Type');
+                return false;
+            }
+        }
+
+        if (tds === '1'){
+            if (pora === ''){
+                alert('Select TDS Amount Type');
+                return false;
+            }else if(pora === 'Percentage'){
+                if (pcnt === ''){
+                    alert('Add Percentage of TDS');
+                    return false;
+                }
+            }else if(pora === 'Amount'){
+                if (amnt === ''){
+                    alert('Add TDS Amount');
+                    return false;
+                }
+            }
+        }
+
+        return true; 
+    }
+</script>
 
 <script>
     const input = document.getElementById("an");
