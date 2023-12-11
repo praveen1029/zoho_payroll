@@ -482,16 +482,6 @@
                 <button class="btn" type="submit" style="background-color: chocolate; width: 150px; font-size: medium;">Add</button>
                 <button class="btn btn-danger" type="reset" style="background-color: chocolate; width: 150px; font-size: medium;" onclick="goToTop()">Cancel</button>
             </div>
-            <div class="text-center">
-                {% for message in messages %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert" id="alert">
-                    <strong>{{message}}</strong>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                {% endfor %}
-            </div>
         </form>
     </div>
 </section>

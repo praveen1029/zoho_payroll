@@ -14700,7 +14700,7 @@ def create_loan(request):
 
     payrolls = Payroll.objects.filter(user=request.user, status='Active')
     lemp = []
-    employees_with_loans = Payroll.objects.filter(loan__isnull=False)
+    employees_with_loans = Payroll.objects.filter(loan__isnull=False,user=request.user)
     for e in employees_with_loans:
         lemp.append(e.id)
     company = company_details.objects.get(user=request.user)
@@ -14718,7 +14718,7 @@ def create_loan(request):
     
     
 def employee_list(request):
-    employees_with_loans = Payroll.objects.filter(loan__isnull=False)
+    employees_with_loans = Payroll.objects.filter(loan__isnull=False,user=request.user)
     company=company_details.objects.get(user=request.user)
     for employee in employees_with_loans:
         employee.loan_info = Loan.objects.get(payroll=employee)
@@ -21284,14 +21284,14 @@ def repayment_view(request,id):
 
 def add_repayment(request,id):
     if request.method == 'POST':
-        pamnt=request.POST.get('pamnt')
-        interest=request.POST.get('interest')
+        pamnt=float(request.POST.get('pamnt'))
+        interest=float(request.POST.get('interest'))
         pdate=request.POST.get('paydate')
         pmethod=request.POST.get('payment_method')
         upi_id=request.POST.get('upi_id')
         cheque_id=request.POST.get('cheque_id')
         bank_id=request.POST.get('bnk_id')
-        total=request.POST.get('total')
+        total=float(request.POST.get('total'))
 
         repay = LoanRepayment.objects.filter(loan=id).last()
         balance = repay.balance
@@ -21320,13 +21320,13 @@ def additional_loan_view(request,id):
 
 def add_additional_loan(request,id):
     if request.method == 'POST':
-        namnt=request.POST.get('namnt')
+        namnt=float(request.POST.get('namnt'))
         adjdate=request.POST.get('adjdate')
         pmethod=request.POST.get('payment_method')
         upi_id=request.POST.get('upi_id')
         cheque_id=request.POST.get('cheque_id')
         bank_id=request.POST.get('bnk_id')
-        total=request.POST.get('total')
+        total=float(request.POST.get('total'))
 
         loan = Loan.objects.get(id=id)
 
