@@ -618,6 +618,8 @@ urlpatterns = [
     path('edit_repayment/<int:id>', views.edit_repayment, name='edit_repayment'), 
     path('edit_additional_loan_view/<int:id>', views.edit_additional_loan_view, name='edit_additional_loan_view'), 
     path('edit_additional_loan/<int:id>', views.edit_additional_loan, name='edit_additional_loan'),  
+    path('employee_loan_details_tran/<int:id>', views.employee_loan_details_tran, name='employee_loan_details_tran'),  
+    path('employee_loan_details_stat/<int:id>', views.employee_loan_details_stat, name='employee_loan_details_stat'),  
 
     path('sort_product_name/<int:id>', views.sort_product_name, name='sort_product_name'),
     path('sort_product_hsn/<int:id>', views.sort_product_hsn, name='sort_product_hsn'),

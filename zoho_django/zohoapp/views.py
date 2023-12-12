@@ -14684,7 +14684,7 @@ def create_loan(request):
                 loan=loan,
                 payment_made = loan_amount,
                 interest = 0,
-                total_payment = 0,
+                total_payment = loan_amount,
                 payment_date = issue_date,
                 balance = loan_amount,
                 payment_method = paymethod,
@@ -14706,13 +14706,15 @@ def create_loan(request):
     company = company_details.objects.get(user=request.user)
     dur = LoanDuration.objects.filter(user=request.user)
     bank = Bankcreation.objects.filter(user=request.user)
+    today = datetime.now().strftime('%Y-%m-%d')
     context = {
         'payrolls': payrolls,
         'error_message': error_message,
         'company': company,
         'dur':dur,
         'lemp':lemp,
-        'bank':bank
+        'bank':bank,
+        'today':today
     }
     return render(request, 'create_loan.html', context)
     
@@ -14815,8 +14817,10 @@ def employee_loan_details(request, payroll_id):
         'comments':comments,
         'attach':attach,
         'repay':repay,
-        'last_loan':last_loan
+        'last_loan':last_loan,
+        'state':'0'
     }
+    messages.info(request, '')
     return render(request, 'employee_loan_details.html', context)
     
     
@@ -21305,7 +21309,7 @@ def add_repayment(request,id):
         rep = LoanRepayment(payment_made=pamnt,interest=interest,payment_date=pdate,payment_method=pmethod,total_payment = total,
                             cheque_id=cheque_id,upi_id=upi_id,bank_id=bank_id,balance=bal,particular='EMI PAID',loan=repay.loan)
         rep.save()
-        return redirect('employee_loan_details',id)
+        return redirect('employee_loan_details_tran',id)
 
 def additional_loan_view(request,id):
     today = datetime.now().strftime('%Y-%m-%d')
@@ -21333,7 +21337,7 @@ def add_additional_loan(request,id):
         rep = LoanRepayment(payment_made=namnt,interest=0,total_payment=namnt,payment_date=adjdate,payment_method=pmethod, cheque_id=cheque_id,upi_id=upi_id,
                             bank_id=bank_id,balance=total,particular='ADDITIONAL LOAN ISSUED',loan=loan)
         rep.save()
-        return redirect('employee_loan_details',id)
+        return redirect('employee_loan_details_tran',id)
 
 
 def delete_repayment(request,id):
@@ -21358,7 +21362,7 @@ def delete_repayment(request,id):
                 entry_list[i].balance = float(entry_list[i-1].balance) - float(entry_list[i].payment_made)
             entry_list[i].save()
 
-    return redirect('employee_loan_details',loan_id)
+    return redirect('employee_loan_details_tran',loan_id)
 
 
 def edit_repayment_view(request,id):
@@ -21390,7 +21394,7 @@ def edit_repayment(request,id):
             entry.balance = bal - float(entry.payment_made)
         entry.save()
         bal = entry.balance
-    return redirect('employee_loan_details',repay.loan.id)
+    return redirect('employee_loan_details_tran',repay.loan.id)
 
 
 def edit_additional_loan_view(request,id):
@@ -21419,7 +21423,7 @@ def edit_additional_loan(request,id):
             entry.balance = bal - float(entry.payment_made)
         entry.save()
         bal = entry.balance
-    return redirect('employee_loan_details',repay.loan.id)
+    return redirect('employee_loan_details_tran',repay.loan.id)
 
 
 def import_employee_loan_details(request):
@@ -21537,6 +21541,7 @@ def share_loan_email(request,id):
                 email_message = request.POST['email_message']
                 loan = Loan.objects.get(id=id,user=request.user)
                 repay = LoanRepayment.objects.filter(loan=loan.id)
+                rep = LoanRepayment.objects.filter(loan=loan.id).last()
                 last_loan = LoanRepayment.objects.filter(loan=loan.id).last().balance
                 company = company_details.objects.get(user=request.user)
                 context = {'loan':loan,'repay':repay,'last_loan':last_loan,'company':company}
@@ -21554,9 +21559,50 @@ def share_loan_email(request,id):
                 email.send(fail_silently=False)
 
                 messages.success(request, 'Details has been shared via email successfully..!')
-                return redirect('employee_loan_details',repay.loan.id)
+                return redirect('employee_loan_details_stat',rep.loan.id)
         except Exception as e:
             loan = Loan.objects.get(id=id,user=request.user)
             repay = LoanRepayment.objects.filter(loan=loan.id).last()
-            messages.error(request, f'{e}')
-            return redirect('employee_loan_details',repay.loan.id)
+            return redirect('employee_loan_details_stat',repay.loan.id)
+
+def employee_loan_details_tran(request, id):
+    loan = Loan.objects.get(id=id)
+    all_loan = Loan.objects.filter(user=request.user)
+    company=company_details.objects.get(user=request.user)
+    comments = LoanComment.objects.filter(loan=loan)
+    attach = LoanAttach.objects.filter(loan=loan)
+    repay = LoanRepayment.objects.filter(loan=id)
+    last_loan = LoanRepayment.objects.filter(loan=id).last().balance
+    context = {
+        'loan': loan,
+        'all_loan': all_loan,
+        'company': company,
+        'comments':comments,
+        'attach':attach,
+        'repay':repay,
+        'last_loan':last_loan,
+        'state':'1'
+    }
+    messages.info(request, '')
+    return render(request, 'employee_loan_details.html', context)
+
+def employee_loan_details_stat(request, id):
+    loan = Loan.objects.get(id=id)
+    all_loan = Loan.objects.filter(user=request.user)
+    company=company_details.objects.get(user=request.user)
+    comments = LoanComment.objects.filter(loan=loan)
+    attach = LoanAttach.objects.filter(loan=loan)
+    repay = LoanRepayment.objects.filter(loan=id)
+    last_loan = LoanRepayment.objects.filter(loan=id).last().balance
+    context = {
+        'loan': loan,
+        'all_loan': all_loan,
+        'company': company,
+        'comments':comments,
+        'attach':attach,
+        'repay':repay,
+        'last_loan':last_loan,
+        'state':'2'
+    }
+    messages.info(request, '')
+    return render(request, 'employee_loan_details.html', context)

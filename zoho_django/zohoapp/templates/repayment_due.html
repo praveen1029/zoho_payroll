@@ -68,7 +68,7 @@
                     {{ message }}
                 </div>
             </h5>
-        {% endfor %}
+            {% endfor %}
         </div>
 
         <form method="POST" action="{% url 'add_repayment' loan.id %}" id="myForm" onsubmit="return validateform()">

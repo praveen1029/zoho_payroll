@@ -166,7 +166,7 @@
             <table class="table  text-white" id="myTable">
               <tbody>
                 {% for l in all_loan %}
-                  <tr class="clickable" id="{{l.id}}">
+                  <tr class="clickable" data-href="{% url 'employee_loan_details' l.id %}">
                     <td class="justify-content-between align-items-center ">
                         <b style="font-size: large;">{{ l.payroll.first_name }} {{ l.payroll.last_name }}</b><br><br>
                         <label>{{ l.date_issue }}</label>
@@ -458,7 +458,7 @@
             <div class="col-md-5"><input type="text" id="searchtransaction" class="form-control bg-light text-dark" placeholder="Search.." autocomplete="off" style="height: 85%;width: 102%;"></div>
             <div class="col-md-2"></div>
             <div class="col-md-5">
-              <a class="text-white" style="font-size: small; text-align: right;"><h2>Loan Amount : {{last_loan}} &nbsp;</h2></a>
+              <a class="text-white" style="font-size: small; text-align: right;"><h2>Balance Loan : {{last_loan}} &nbsp;</h2></a>
             </div>
           </div>
           <div style="background-color: #ffddb0; border-radius: 5px;">
@@ -574,7 +574,15 @@
                 <a class="dropdown-item" href="whatsapp://send?text=Check out this website: [Your URL]" data-action="share/whatsapp/share">WhatsApp</a>
               </div>
             </div>
-
+            <div class="header">
+              {% for message in messages %}
+              <h5>
+                <div class="alert alert-danger message" style="margin-top: 5vh;">
+                  {{ message }}
+                </div>
+              </h5>
+              {% endfor %}
+            </div>
             <div id="printdiv" class="mt-3" style="overflow-y: scroll;height: 600px;width: 100%; margin-left: -1vh">
               <section  id="div-to-pdf" style="background-color: rgb(255, 221, 176);"class=" p-2 m-2">
                 <header style="	background-color: #8b3131;border-radius: 1rem;">
@@ -739,7 +747,6 @@
                   </div>
                 </form>
               </div>
-
             </div>
           </div>
         </div>
@@ -769,6 +776,15 @@
 </script>
 
 <script>
+  state = '{{state}}'
+  if(state == '1'){
+    totransaction()
+  }else if(state == '2'){
+    tostatement()
+  }else{
+    tooverview()
+  }
+
   function tooverview(){
     document.getElementById('overviewdiv').style.display = 'block'
     document.getElementById('transactiondiv').style.display = 'none'
@@ -813,14 +829,9 @@
 </script>
 
 <script>
-  const rows = document.querySelectorAll('.clickable');
-  rows.forEach(row => {
-    row.addEventListener('click', () => {
-      var currentURL = window.location.href
-      const rowId = row.id;
-      var replacementPattern = new RegExp('/employee/\\d+/loan/');
-      var newURL = currentURL.replace(replacementPattern, '/employee/' + rowId + '/loan/');
-      window.location.href = newURL;
+  jQuery(document).ready(function($) {
+    $(".clickable").click(function() {
+      window.location = $(this).data("href");
     });
   });
 </script>
