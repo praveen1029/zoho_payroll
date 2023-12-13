@@ -72,7 +72,7 @@
       top: 0;
       bottom: 0;
       width: 70vh;
-      height: 100%;
+      height: 10%;
     } 
   }
 
@@ -208,8 +208,8 @@
             </div>
           </div><br>
 
-          <div id="printdiv" style="overflow-y: scroll; height: 71vh;">
-            <div class="row" id="div-to-pdf" style="background-color: #ffddb0; margin-left:1px; margin-right: 1rem; ">
+          <div id="printdiv" style="overflow-y: scroll; height: 70vh;">
+            <div class="row" id="div-to-pdf" style="background-color: #ffddb0; margin-left:1px; margin-right: 1rem;">
               <br>
               <div class="row">
                 <div class="col-md-3 mt-3" >
@@ -234,7 +234,7 @@
                   <div class="col-2"></div>
                   <div class="col-6" style="text-align: center; ">
                     <a href=" " download>
-                      <img class="img-fluid" src="{{p.image.url}}" alt="" width="150px" name="img">
+                      <img class="img-fluid" src="{{p.image.url}}" alt="" width="119px" name="img">
                       <br><br>
                       <p style="color: black;">{{p.title}} &nbsp;{{p.first_name}} &nbsp;{{p.last_name}}
                         {% if p.alias %}
@@ -549,9 +549,8 @@
 <script>
   function exportToPDF(){
     var content = document.getElementById('div-to-pdf');
-    content.style.height = 'auto';
     content.style.marginRight = '-1rem';
-    html2pdf().from(content).save('Employee.pdf')
+    html2pdf().from(content).save('Employee_Details.pdf')
     setTimeout(function() {
       content.style.marginRight = '1rem';
     }, 1);
@@ -559,7 +558,7 @@
 </script>
 
 <script>
-  function printSelectedArea(area){
+  function printSelectedArea(){
     var printContents = document.getElementById("printdiv").innerHTML;
     var $printerDiv = $('<div class="printContainer bg-white"></div>');
     $printerDiv.html(printContents);

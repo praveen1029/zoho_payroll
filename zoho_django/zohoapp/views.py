@@ -9431,6 +9431,13 @@ def editpayroll(request,id):
     p=Payroll.objects.get(id=id)
     if request.method=='POST':
         p.title=request.POST['title']
+        
+        if p.first_name != request.POST['fname'] and p.last_name != request.POST['lname']:
+            emp = Payroll.objects.filter(first_name=request.POST['fname'],last_name=request.POST['lname'])
+            if emp:
+                messages.info(request,'Employee Already Exist')
+                return redirect('payroll_edit')
+            
         p.first_name=request.POST['fname']
         p.last_name=request.POST['lname']
         p.alias=request.POST['alias']
@@ -9513,7 +9520,6 @@ def editpayroll(request,id):
                 ttype=request.POST['ttype']
                 b=Bankdetails(payroll=p,acc_no=accno,IFSC=ifsc,bank_name=bname,branch=branch,transaction_type=ttype)
                 b.save()
-        
     else:
         return redirect('payroll_view',id=id)
     return redirect('payroll_view',id=id)
@@ -9524,6 +9530,12 @@ def createpayroll(request):
         title=request.POST['title']
         fname=request.POST['fname']
         lname=request.POST['lname']
+
+        emp = Payroll.objects.filter(first_name=fname,last_name=lname)
+        if emp:
+            messages.info(request,'Employee Already Exist')
+            return redirect('payroll_create')
+
         alias=request.POST['alias']
         joindate=request.POST['joindate']
         salarydate=request.POST['salary']
@@ -9588,7 +9600,6 @@ def createpayroll(request):
         attach=request.FILES.get('attach')       
         if(attach):
             Payrollfiles.objects.create(attachment=attach,payroll=payroll)
-
         return redirect('payroll_list')
     else:
         return redirect('payroll_create')
@@ -9597,6 +9608,7 @@ def createpayroll(request):
 def payroll_list(request):
     company=company_details.objects.get(user=request.user)
     p=Payroll.objects.filter(user=request.user)
+    messages.info('')
     return render(request,'payroll_list.html',{'pay':p,'company':company})
     
 def payroll_delete(request,pid):
@@ -15051,6 +15063,12 @@ def createpayroll2(request):
         title=request.POST['title']
         fname=request.POST['fname']
         lname=request.POST['lname']
+
+        emp = Payroll.objects.filter(first_name=fname,last_name=lname)
+        if emp:
+            messages.info(request,'Employee Already Exist')
+            return redirect('create_loan')
+
         alias=request.POST['alias']
         joindate=request.POST['joindate2']
         salarydate=request.POST['salarydate']
@@ -15120,7 +15138,6 @@ def createpayroll2(request):
         if(attach):
             att=Payrollfiles(attachment=attach,payroll=payroll)
         # messages.success(request,'Saved succefully !')
-        print(bank)
         return redirect('create_loan')
     else:
         return redirect('create_loan')

@@ -7,6 +7,7 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+
 <style>
     .modal{
         z-index: 9999;
@@ -55,6 +56,44 @@
         width: 150px;
         margin-right: 10px;
     }
+
+    .custom-dropdown {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .dropdown-input {
+        padding: 8px;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        color: black;
+    }
+
+    .dropdown-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+        background-color: #fff;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .dropdown-item {
+        padding: 8px;
+        color: black;
+    }
+
+    .dropdown-item:hover {
+        background-color: #0275d8;
+        color: white;
+    }
 </style>
 
 <section>
@@ -62,6 +101,13 @@
         <div class="header pb-5">
             <h2 class="mb-0 text-uppercase text-right">CREATE EMPLOYEE LOAN</h2>
             <hr>
+            {% for message in messages %}
+            <h5>
+                <div class="alert alert-danger message">
+                    {{ message }}
+                </div>
+            </h5>
+            {% endfor %}
         </div>
         <form method="POST" action="{% url 'create_loan' %}" id="myForm" onsubmit="return validateform()">
             {% csrf_token %}
@@ -69,32 +115,34 @@
                 <div class="data">
                     <div class="row pb-3">
                         <div class="col-3">
-                            <label for="">Select Employee</label>
+                            <label for="">Employee Name</label>
                         </div>
                         <div class="col-5">
                             <div class=" d-flex">
-                                <select class="form-control text-dark bg-light" name="employee" id="employee" onchange="fillEmployeeDetails(); clearErrorMessage();" style="width: 500px;">
-                                    <option value="" selected hidden>Select an Employee</option>
-                                    {% for payroll in payrolls %}
-                                    {% if payroll.id in lemp %}
-                                    <option value="{{ payroll.id }}"
-                                        data-email="{{ payroll.email }}"
-                                        data-emp-number="{{ payroll.emp_number }}"
-                                        data-salary="{{ payroll.salary }}"
-                                        data-joindate="{{ payroll.joindate | date:'Y-m-d' }}" data-have-loan="1">
-                                        {{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}
-                                    </option>
-                                    {% else %}
-                                    <option value="{{ payroll.id }}"
-                                        data-email="{{ payroll.email }}"
-                                        data-emp-number="{{ payroll.emp_number }}"
-                                        data-salary="{{ payroll.salary }}"
-                                        data-joindate="{{ payroll.joindate | date:'Y-m-d' }}" data-have-loan="0">
-                                        {{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}
-                                    </option>
-                                    {% endif %}
-                                    {% endfor %}
-                                </select>
+                                <div class="custom-dropdown">
+                                    <input type="text" id="employee_id"  name="employee" hidden>
+                                    <input type="text" class="dropdown-input" placeholder="Select">
+                                    <div class="dropdown-list" id="employee">
+                                        {% for payroll in payrolls %}
+                                        {% if payroll.id in lemp %}
+                                            <div class="dropdown-item"
+                                                data-value="{{ payroll.id }}" data-name = "{{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}"
+                                                data-email="{{ payroll.email }}"
+                                                data-emp-number="{{ payroll.emp_number }}"
+                                                data-salary="{{ payroll.salary }}"
+                                                data-joindate="{{ payroll.joindate | date:'Y-m-d' }}" data-have-loan="1">{{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}</div>
+                                        {% else %}
+                                            <div class="dropdown-item" 
+                                                data-value="{{ payroll.id }}" data-name = "{{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}"
+                                                data-email="{{ payroll.email }}"
+                                                data-emp-number="{{ payroll.emp_number }}"
+                                                data-salary="{{ payroll.salary }}"
+                                                data-joindate="{{ payroll.joindate | date:'Y-m-d' }}" data-have-loan="0">{{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}</div>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
                                 <a data-toggle="modal" data-target="#newvendor" class="btn" style="background-color: chocolate; color: black; height: 100%; margin-left: 2vh; font-size: large; padding-top: 10px; ">+</a>
                             </div>
                             <div id="error-employee" style="color: red;"></div>
@@ -1066,6 +1114,46 @@
         ageInput.value = age;
     }
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var input = document.querySelector('.dropdown-input');
+        var dropdownList = document.querySelector('#employee');
+
+        input.addEventListener('focus', function () {
+            dropdownList.style.display = 'block';
+        });
+
+        document.addEventListener('mousedown', function (event) {
+            if (!event.target.closest('.custom-dropdown')) {
+                dropdownList.style.display = 'none';
+            }
+        });
+
+        dropdownList.addEventListener('click', function (event) {
+            if (event.target.classList.contains('dropdown-item')) {
+                input.value = event.target.textContent;
+                dropdownList.style.display = 'none';
+                fillEmployeeDetails();
+                clearErrorMessage();
+            }
+        });
+
+        input.addEventListener('input', function () {
+            var filterValue = input.value.toLowerCase();
+            var items = dropdownList.querySelectorAll('.dropdown-item');
+
+            items.forEach(function (item) {
+                var itemText = item.textContent.toLowerCase();
+                if (itemText.includes(filterValue)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
         
 <script>
     $(document).on("click", "#vendorSave", function () {
@@ -1149,17 +1237,27 @@
             data: $(this).serialize(),
             csrfmiddlewaretoken: '{{ csrf_token }}',
             success: function(data) {
-                var dropdown = $('#employee');
-                dropdown.empty();
-                dropdown.append($('<option selected hidden></option>').attr('value', '').text('Select an Employee'));
+                var dropdownList = document.querySelector('#employee');
+                dropdownList.value = '';
+                dropdownList.innerHTML = '';
+                document.getElementById('error-employee').innerText = '';
+                $("#email").val("");
+                $("#emp_id").val("");
+                $("#salary").val("");
+                $("#joindate").val("");
+                $("#employee_id").val("");
                 $.each(data, function(key, value) {
-                    var option = $('<option></option>').attr('value', key).text(value['employee_name']).val(key);
-                    option.data('email', value['email']);
-                    option.data('salary', value['salary']);
-                    option.data('emp-number', value['employee']);
-                    option.data('have-loan', value['have-loan']);
-                    option.data('joindate', value['join_date']);
-                    dropdown.append(option);
+                    var newItem = document.createElement('div');
+                    newItem.className = 'dropdown-item';
+                    newItem.textContent = value['employee_name'];
+                    newItem.setAttribute('data-value', key);
+                    newItem.setAttribute('data-name', value['employee_name']);
+                    newItem.setAttribute('data-email', value['email']);
+                    newItem.setAttribute('data-salary', value['salary']);
+                    newItem.setAttribute('data-emp-number', value['employee']);
+                    newItem.setAttribute('data-have-loan', value['have-loan']);
+                    newItem.setAttribute('data-joindate', value['join_date']);
+                    dropdownList.appendChild(newItem);
                 });
             },
             error: function(xhr, status, error) {
@@ -1170,22 +1268,28 @@
 
     function fillEmployeeDetails() {
         document.getElementById('error-employee').innerText = ''
-        var selectedOption = $("#employee option:selected");
-        if(selectedOption.data('have-loan') == '1'){
+        var input = document.querySelector('.dropdown-input');
+        var selectedValue = input.value;
+        selectedItem = document.querySelector('.dropdown-item[data-name="' + selectedValue + '"]');
+        if (selectedItem.getAttribute("data-have-loan") == '0') {
+            document.getElementById('error-employee').innerText = '';
+            var value = selectedItem.getAttribute("data-value");
+            var email = selectedItem.getAttribute("data-email");
+            var empNumber = selectedItem.getAttribute("data-emp-number");
+            var salary = selectedItem.getAttribute("data-salary");
+            var joinDate = selectedItem.getAttribute("data-joindate");
+            $("#email").val(email);
+            $("#emp_id").val(empNumber);
+            $("#salary").val(salary);
+            $("#joindate").val(joinDate);
+            $("#employee_id").val(value);
+        }else{
             document.getElementById('error-employee').innerText = `This Employee Already Have a Loan`
             $("#email").val("");
             $("#emp_id").val("");
             $("#salary").val("");
             $("#joindate").val("");
-        }else{
-            var email = selectedOption.data("email");
-            var empNumber = selectedOption.data("emp-number");
-            var salary = selectedOption.data("salary");
-            var joinDate = selectedOption.data("joindate");
-            $("#email").val(email);
-            $("#emp_id").val(empNumber);
-            $("#salary").val(salary);
-            $("#joindate").val(joinDate);
+            $("#employee_id").val("");
         }
     }
 

@@ -52,6 +52,13 @@
         <div class="header pb-5">
             <h2>CREATE EMPLOYEE</h2>
             <hr>
+            {% for message in messages %}
+            <h5>
+                <div class="alert alert-danger message">
+                    {{ message }}
+                </div>
+            </h5>
+            {% endfor %}
         </div>
         <form method="POST" action="{% url 'createpayroll' %}" enctype="multipart/form-data" id="myForm" onsubmit="return validateform()">
             {% csrf_token %}
