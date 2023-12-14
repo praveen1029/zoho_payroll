@@ -9608,7 +9608,7 @@ def createpayroll(request):
 def payroll_list(request):
     company=company_details.objects.get(user=request.user)
     p=Payroll.objects.filter(user=request.user)
-    messages.info('')
+    messages.info(request,'')
     return render(request,'payroll_list.html',{'pay':p,'company':company})
     
 def payroll_delete(request,pid):
